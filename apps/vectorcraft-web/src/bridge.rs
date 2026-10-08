@@ -15,7 +15,8 @@ pub fn post_to_parent(msg: &Value) {
     if let Some(window) = web_sys::window() {
         if let Ok(Some(parent)) = window.parent() {
             let js_str = msg.to_string();
-            let _ = parent.post_message(&JsValue::from_str(&js_str), "*");
+            let val = js_sys::JSON::parse(&js_str).unwrap_or_else(|_| JsValue::from_str(&js_str));
+            let _ = parent.post_message(&val, "*");
         }
     }
 }
