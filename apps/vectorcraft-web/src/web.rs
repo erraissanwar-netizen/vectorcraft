@@ -15,7 +15,9 @@ use vectorcraft_ui_egui::place::{DropTarget, PlaceArrival, PlaceInbox};
 use vectorcraft_ui_egui::print::{PrintJob, PrintService, Printer};
 use vectorcraft_ui_egui::{Services, VectorcraftApp};
 use wasm_bindgen::JsCast as _;
+use serde_json::json;
 
+use crate::bridge::BridgeInbox;
 use crate::locks::WebLocks;
 
 type Inbox = Arc<Mutex<Vec<(String, Vec<u8>)>>>;
@@ -45,6 +47,7 @@ struct Host {
     runner: eframe::WebRunner,
     inbox: Inbox,
     place_inbox: PlaceInbox,
+    bridge_inbox: BridgeInbox,
     drag: DragPos,
     pasted: Rc<RefCell<Pasted>>,
     /// The page's Web Locks for Data Recovery, started once before the first frame: a graphics
@@ -68,6 +71,7 @@ pub fn start() {
             runner: eframe::WebRunner::new(),
             inbox: Arc::default(),
             place_inbox: Arc::default(),
+            bridge_inbox: BridgeInbox::default(),
             drag: DragPos::default(),
             pasted: Rc::default(),
             locks,
@@ -101,6 +105,8 @@ async fn run(host: Host, canvas: web_sys::HtmlCanvasElement, moving: Option<Movi
                 let ctx = &cc.egui_ctx;
                 let loss = GraphicsLoss::default();
                 watch_canvas(&page, &loss, ctx);
+                crate::bridge::start_listener(host.bridge_inbox.clone(), ctx.clone());
+                crate::bridge::notify_ready();
                 if let Some(rs) = &cc.wgpu_render_state {
                     log::info!("vectorcraft-web: wgpu backend {:?}", rs.adapter.get_info().backend);
                     let (loss, ctx) = (loss.clone(), ctx.clone());
@@ -117,7 +123,15 @@ async fn run(host: Host, canvas: web_sys::HtmlCanvasElement, moving: Option<Movi
                     }
                     None => VectorcraftApp::new(Session::new(), services),
                 };
-                Ok(Box::new(WebShell { app: Some(app), host, canvas: page, loss }))
+                Ok(Box::new(WebShell {
+                    app: Some(app),
+                    host,
+                    canvas: page,
+                    loss,
+                    last_dirty: None,
+                    last_revision: 0,
+                    last_selection_count: 0,
+                }))
             }),
         )
         .await;
@@ -311,6 +325,9 @@ struct WebShell {
     host: Host,
     canvas: web_sys::HtmlCanvasElement,
     loss: GraphicsLoss,
+    last_dirty: Option<bool>,
+    last_revision: u64,
+    last_selection_count: usize,
 }
 
 impl WebShell {
@@ -341,6 +358,71 @@ impl eframe::App for WebShell {
             self.restart(&why);
         }
         let Some(app) = &mut self.app else { return };
+
+        // Process incoming bridge commands from SVGCode host
+        let bridge_cmds = {
+            let mut q = self.host.bridge_inbox.commands.lock().unwrap_or_else(|e| e.into_inner());
+            std::mem::take(&mut *q)
+        };
+        for cmd in bridge_cmds {
+            match cmd.get("action").and_then(|v| v.as_str()) {
+                Some("load_svg") => {
+                    if let Some(svg_text) = cmd.get("svg").and_then(|v| v.as_str()) {
+                        let bytes = svg_text.as_bytes().to_vec();
+                        self.host.inbox.lock().unwrap_or_else(|e| e.into_inner()).push(("document.svg".into(), bytes));
+                        ctx.request_repaint();
+                    }
+                }
+                Some("export") => {
+                    let req_id = cmd.get("requestId").and_then(|v| v.as_str()).unwrap_or("req");
+                    let fmt = cmd.get("format").and_then(|v| v.as_str()).unwrap_or("svg");
+                    match app.run("document.export", json!({ "format": fmt })) {
+                        Ok(res) => {
+                            if let Some(b64) = res.get("dataBase64").and_then(|v| v.as_str()) {
+                                let export_data = if fmt == "svg" {
+                                    match vectorcraft_format::base64_decode(b64) {
+                                        Some(raw) => String::from_utf8(raw).unwrap_or_else(|_| b64.to_string()),
+                                        None => b64.to_string(),
+                                    }
+                                } else {
+                                    format!("data:image/{fmt};base64,{b64}")
+                                };
+                                crate::bridge::post_to_parent(&json!({
+                                    "type": "vectorcraft:export_result",
+                                    "payload": {
+                                        "requestId": req_id,
+                                        "format": fmt,
+                                        "data": export_data
+                                    }
+                                }));
+                            }
+                        }
+                        Err(e) => {
+                            crate::bridge::post_to_parent(&json!({
+                                "type": "vectorcraft:error",
+                                "payload": {
+                                    "message": format!("Export error: {e}")
+                                }
+                            }));
+                        }
+                    }
+                }
+                Some("undo") => {
+                    let _ = app.run("edit.undo", json!({}));
+                    ctx.request_repaint();
+                }
+                Some("redo") => {
+                    let _ = app.run("edit.redo", json!({}));
+                    ctx.request_repaint();
+                }
+                Some("zoom_fit") => {
+                    let _ = app.run("view.fitArtboard", json!({}));
+                    ctx.request_repaint();
+                }
+                _ => {}
+            }
+        }
+
         let pasted = self.host.pasted.borrow_mut().flavour.take();
         if let Some((f, held)) = pasted {
             app.paste_from_host(ctx, f, held);
@@ -371,6 +453,35 @@ impl eframe::App for WebShell {
             }
         }
         app.logic(ctx);
+
+        // Track document status changes and notify SVGCode host
+        if let Some(doc_state) = app.session.active() {
+            let is_dirty = doc_state.is_dirty();
+            let revision = doc_state.revision;
+            if self.last_dirty != Some(is_dirty) || self.last_revision != revision {
+                self.last_dirty = Some(is_dirty);
+                self.last_revision = revision;
+                crate::bridge::post_to_parent(&json!({
+                    "type": "vectorcraft:dirty_change",
+                    "payload": {
+                        "isDirty": is_dirty,
+                        "revision": revision
+                    }
+                }));
+            }
+
+            let sel_count = doc_state.selection.objects.len();
+            if self.last_selection_count != sel_count {
+                self.last_selection_count = sel_count;
+                crate::bridge::post_to_parent(&json!({
+                    "type": "vectorcraft:selection_change",
+                    "payload": {
+                        "selectedCount": sel_count,
+                        "hasSelection": sel_count > 0
+                    }
+                }));
+            }
+        }
     }
 
     fn raw_input_hook(&mut self, _ctx: &egui::Context, raw: &mut egui::RawInput) {

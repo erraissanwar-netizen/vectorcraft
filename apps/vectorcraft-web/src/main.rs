@@ -15,6 +15,8 @@
 //! language code) stands in for the browser's languages when the interface language is Automatic.
 
 #[cfg(target_arch = "wasm32")]
+mod bridge;
+#[cfg(target_arch = "wasm32")]
 mod locks;
 #[cfg(target_arch = "wasm32")]
 mod web;

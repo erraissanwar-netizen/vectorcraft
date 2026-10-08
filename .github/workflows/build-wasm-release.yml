@@ -13,6 +13,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Checkout craft-fonts
+        uses: actions/checkout@v4
+        with:
+          repository: storytold/craft-fonts
+          ref: abb83316d96aa59c1cf64784289e378fe9fa5695
+          path: craft-fonts
+
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
         with:
@@ -25,17 +32,21 @@ jobs:
 
       - name: Install Trunk build tool
         run: |
-          TRUNK_VERSION=0.21.8
+          TRUNK_VERSION=0.21.14
           curl -fsSL "https://github.com/trunk-rs/trunk/releases/download/v${TRUNK_VERSION}/trunk-x86_64-unknown-linux-gnu.tar.gz" | tar -xz -C "$HOME/.cargo/bin" trunk
           trunk --version
 
       - name: Compile WASM Bundle
+        env:
+          CRAFT_FONTS_DIR: ${{ github.workspace }}/craft-fonts
         run: |
           cd apps/vectorcraft-web
-          trunk build --release --dist ../../dist-runtime
+          trunk build --release
 
       - name: Package Runtime Bundle
         run: |
+          mkdir -p dist-runtime
+          cp -r dist/web/* dist-runtime/
           cd dist-runtime
           tar -czvf ../vectorcraft-web-runtime.tar.gz *
 
