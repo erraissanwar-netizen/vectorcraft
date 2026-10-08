@@ -1,0 +1,47 @@
+name: Build SVGCode VectorCraft Web WASM
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-wasm:
+    name: Compile WebAssembly Runtime
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - name: Cache Cargo dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: vectorcraft-wasm
+
+      - name: Install Trunk build tool
+        run: |
+          TRUNK_VERSION=0.21.8
+          curl -fsSL "https://github.com/trunk-rs/trunk/releases/download/v${TRUNK_VERSION}/trunk-x86_64-unknown-linux-gnu.tar.gz" | tar -xz -C "$HOME/.cargo/bin" trunk
+          trunk --version
+
+      - name: Compile WASM Bundle
+        run: |
+          cd apps/vectorcraft-web
+          trunk build --release --dist ../../dist-runtime
+
+      - name: Package Runtime Bundle
+        run: |
+          cd dist-runtime
+          tar -czvf ../vectorcraft-web-runtime.tar.gz *
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vectorcraft-wasm-runtime
+          path: dist-runtime/*
+          if-no-files-found: error

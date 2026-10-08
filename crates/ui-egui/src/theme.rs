@@ -96,40 +96,40 @@ impl Tokens {
         let hex = |s: u32| Color32::from_rgb((s >> 16) as u8, (s >> 8) as u8, s as u8);
         let base = Tokens {
             dark: true,
-            app_bar: hex(0x262626),
-            panel: hex(0x323232),
-            panel_darker: hex(0x282828),
-            input: hex(0x1f1f1f),
-            input_border: hex(0x464646),
-            border: hex(0x1b1b1b),
-            divider: hex(0x3f3f3f),
-            text: hex(0xd8d8d8),
-            text_dim: hex(0xa8a8a8),
-            text_disabled: hex(0x6e6e6e),
+            app_bar: hex(0x0a0a0a),
+            panel: hex(0x0a0a0a),
+            panel_darker: hex(0x111111),
+            input: hex(0x0d0d0f),
+            input_border: hex(0x27272a),
+            border: hex(0x27272a),
+            divider: hex(0x27272a),
+            text: hex(0xfafafa),
+            text_dim: hex(0xa1a1aa),
+            text_disabled: hex(0x52525b),
             icon: hex(0xcfcfcf),
-            hover: hex(0x444444),
-            tool_active: hex(0x1d1d1d),
-            accent: hex(0x378ef0),
-            accent_strong: hex(0x1473e6),
-            row_selected: hex(0x484b50),
-            pasteboard: hex(0x1e1e1e),
-            ruler: hex(0x2f2f2f),
-            ruler_tick: hex(0x8a8a8a),
+            hover: hex(0x1f1f23),
+            tool_active: hex(0x111111),
+            accent: hex(0xff5100),
+            accent_strong: hex(0xca4000),
+            row_selected: hex(0x27272a),
+            pasteboard: hex(0x18181b),
+            ruler: hex(0x111111),
+            ruler_tick: hex(0x52525b),
             smart_guide: hex(0xff3dfc),
             guide: hex(0x4affff),
-            measure_bg: Color32::from_rgba_unmultiplied(92, 92, 92, 235),
-            button: hex(0x444444),
-            radius: 2,
-            text_strong: hex(0xf5f5f5),
-            tab_strip: hex(0x282828),
-            button_border: hex(0x6a6a6a),
-            selection: hex(0x4f80ff),
-            anchor_selected: hex(0x3d82ff),
-            flyout_active: hex(0x54b2f7),
+            measure_bg: Color32::from_rgba_unmultiplied(39, 39, 42, 235),
+            button: hex(0x18181b),
+            radius: 4,
+            text_strong: hex(0xffffff),
+            tab_strip: hex(0x111111),
+            button_border: hex(0x27272a),
+            selection: hex(0xff5100),
+            anchor_selected: hex(0xff5100),
+            flyout_active: hex(0xff5100),
             font_size: 13.0,
             caption_close: hex(0xc42b1c),
             caption_close_text: Color32::WHITE,
-            highlight: hex(0xff3030),
+            highlight: hex(0xff5100),
             bleed: hex(0xf03030),
             error: hex(0xe34850),
             warning: hex(0xf0a330),
@@ -187,28 +187,28 @@ impl Tokens {
                 ..base
             },
             Brightness::Light => Tokens {
-                tab_strip: hex(0xdddddd),
-                text_strong: hex(0x000000),
-                button_border: hex(0x9a9a9a),
+                tab_strip: hex(0xf5f3f0),
+                text_strong: hex(0x0f172a),
+                button_border: hex(0xe8e5e1),
                 dark: false,
-                app_bar: hex(0xe4e4e4),
-                panel: hex(0xf0f0f0),
-                panel_darker: hex(0xe2e2e2),
-                input: hex(0xffffff),
-                input_border: hex(0xb4b4b4),
-                border: hex(0xcfcfcf),
-                divider: hex(0xd6d6d6),
-                text: hex(0x1f1f1f),
-                text_dim: hex(0x4b4b4b),
-                text_disabled: hex(0x9a9a9a),
-                icon: hex(0x303030),
-                hover: hex(0xdddddd),
-                tool_active: hex(0xcdcdcd),
-                row_selected: hex(0xc8daf7),
-                pasteboard: hex(0xdcdcdc),
-                ruler: hex(0xeaeaea),
-                ruler_tick: hex(0x5a5a5a),
-                button: hex(0xe0e0e0),
+                app_bar: hex(0xfdfcfb),
+                panel: hex(0xfaf7f4),
+                panel_darker: hex(0xf5f3f0),
+                input: hex(0xfdfdfd),
+                input_border: hex(0xe8e5e1),
+                border: hex(0xe8e5e1),
+                divider: hex(0xe8e5e1),
+                text: hex(0x0f172a),
+                text_dim: hex(0x64748b),
+                text_disabled: hex(0x94a3b8),
+                icon: hex(0x0f172a),
+                hover: hex(0xefece8),
+                tool_active: hex(0xefece8),
+                row_selected: hex(0xefece8),
+                pasteboard: hex(0xe5e2dc),
+                ruler: hex(0xf5f3f0),
+                ruler_tick: hex(0x64748b),
+                button: hex(0xf5f3f0),
                 ..base
             },
         }
@@ -219,6 +219,64 @@ impl Tokens {
     }
     pub fn cr(&self) -> CornerRadius {
         CornerRadius::same(self.radius)
+    }
+
+    /// Dynamically update colors from SVGCode design tokens passed across the postMessage bridge
+    pub fn update_from_svgcode_json(&mut self, json: &serde_json::Value) {
+        let hex = |val: &str| {
+            let s = val.trim_start_matches('#');
+            if let Ok(num) = u32::from_str_radix(s, 16) {
+                Color32::from_rgb((num >> 16) as u8, (num >> 8) as u8, num as u8)
+            } else {
+                Color32::WHITE
+            }
+        };
+
+        if let Some(accent) = json.get("accent").and_then(|v| v.as_str()) {
+            self.accent = hex(accent);
+        }
+        if let Some(accent_strong) = json.get("accentStrong").and_then(|v| v.as_str()) {
+            self.accent_strong = hex(accent_strong);
+        }
+        if let Some(app_bar) = json.get("appBar").and_then(|v| v.as_str()) {
+            self.app_bar = hex(app_bar);
+        }
+        if let Some(panel) = json.get("panel").and_then(|v| v.as_str()) {
+            self.panel = hex(panel);
+        }
+        if let Some(panel_darker) = json.get("panelDarker").and_then(|v| v.as_str()) {
+            self.panel_darker = hex(panel_darker);
+        }
+        if let Some(tab_strip) = json.get("tabStrip").and_then(|v| v.as_str()) {
+            self.tab_strip = hex(tab_strip);
+        }
+        if let Some(input) = json.get("input").and_then(|v| v.as_str()) {
+            self.input = hex(input);
+        }
+        if let Some(input_border) = json.get("inputBorder").and_then(|v| v.as_str()) {
+            self.input_border = hex(input_border);
+        }
+        if let Some(border) = json.get("border").and_then(|v| v.as_str()) {
+            self.border = hex(border);
+        }
+        if let Some(divider) = json.get("divider").and_then(|v| v.as_str()) {
+            self.divider = hex(divider);
+        }
+        if let Some(text) = json.get("text").and_then(|v| v.as_str()) {
+            self.text = hex(text);
+        }
+        if let Some(text_strong) = json.get("textStrong").and_then(|v| v.as_str()) {
+            self.text_strong = hex(text_strong);
+        }
+        if let Some(text_dim) = json.get("textDim").and_then(|v| v.as_str()) {
+            self.text_dim = hex(text_dim);
+        }
+        if let Some(hover) = json.get("hover").and_then(|v| v.as_str()) {
+            self.hover = hex(hover);
+        }
+        if let Some(pasteboard) = json.get("pasteboard").and_then(|v| v.as_str()) {
+            self.pasteboard = hex(pasteboard);
+        }
     }
 }
 
@@ -238,17 +296,19 @@ pub fn install_fonts(ctx: &egui::Context) {
     let add = |f: &mut FontDefinitions, name: &str, bytes: &'static [u8]| {
         f.font_data.insert(name.to_owned(), Arc::new(FontData::from_static(bytes)));
     };
+    add(&mut fonts, "Inter", include_bytes!("../../../assets/fonts/Inter-Regular.ttf"));
+    add(&mut fonts, "Inter-Semibold", include_bytes!("../../../assets/fonts/Inter-SemiBold.ttf"));
     add(&mut fonts, "SourceSans3", include_bytes!("../../../assets/fonts/SourceSans3-Regular.ttf"));
     add(&mut fonts, "SourceSans3-Semibold", include_bytes!("../../../assets/fonts/SourceSans3-Semibold.ttf"));
     add(&mut fonts, "JetBrainsMono", include_bytes!("../../../assets/fonts/JetBrainsMono-Regular.ttf"));
     let fallback: Vec<String> = fonts.families.get(&FontFamily::Proportional).cloned().unwrap_or_default();
-    let mut prop = vec!["SourceSans3".to_string()];
+    let mut prop = vec!["Inter".to_string(), "SourceSans3".to_string()];
     prop.extend(fallback.clone());
     fonts.families.insert(FontFamily::Proportional, prop);
-    let mut semi = vec!["SourceSans3-Semibold".to_string()];
+    let mut semi = vec!["Inter-Semibold".to_string(), "SourceSans3-Semibold".to_string()];
     semi.extend(fallback.clone());
     fonts.families.insert(FontFamily::Name(FONT_UI_SEMIBOLD.into()), semi);
-    let mut ui = vec!["SourceSans3".to_string()];
+    let mut ui = vec!["Inter".to_string(), "SourceSans3".to_string()];
     ui.extend(fallback.clone());
     fonts.families.insert(FontFamily::Name(FONT_UI.into()), ui);
     let mut mono = vec!["JetBrainsMono".to_string()];
@@ -276,9 +336,13 @@ fn add_craft_fonts(fonts: &mut FontDefinitions) {
     }
 }
 
-/// Apply tokens to egui's global style.
+/// Apply tokens to egui's global style from Brightness enum.
 pub fn apply(ctx: &egui::Context, b: Brightness) {
-    let t = Tokens::for_brightness(b);
+    apply_tokens(ctx, Tokens::for_brightness(b));
+}
+
+/// Apply tokens directly to egui's global style (used for SVGCode runtime token injection).
+pub fn apply_tokens(ctx: &egui::Context, t: Tokens) {
     ctx.data_mut(|d| d.insert_temp(egui::Id::NULL, t));
     let mut v = if t.dark { Visuals::dark() } else { Visuals::light() };
     v.panel_fill = t.panel;
