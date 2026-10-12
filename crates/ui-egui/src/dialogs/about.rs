@@ -1,7 +1,7 @@
-//! Help → About VectorCraft.
+//! Help → About SVGCode.
 
 use crate::VectorcraftApp;
-use crate::theme;
+use crate::theme::{self, Tokens};
 
 /// The About window, while `UiState::about` is set.
 pub(super) fn show(app: &mut VectorcraftApp, ctx: &egui::Context) {
@@ -9,7 +9,7 @@ pub(super) fn show(app: &mut VectorcraftApp, ctx: &egui::Context) {
         return;
     }
     let mut open = true;
-    egui::Window::new(tl!("About VectorCraft"))
+    egui::Window::new(tl!("About SVGCode"))
         .collapsible(false)
         .resizable(false)
         .open(&mut open)
@@ -45,32 +45,51 @@ pub(super) fn show(app: &mut VectorcraftApp, ctx: &egui::Context) {
     app.ui.about = open;
 }
 
-/// The About tab: mark, version, community links, licences and the GPU in use.
+/// The About tab: mark, version, owner credits, licences and the GPU in use.
 fn about_tab(app: &mut VectorcraftApp, ui: &mut egui::Ui) {
+    let t = Tokens::get(ui.ctx());
     ui.set_width(380.0);
     ui.horizontal(|ui| {
         let (r, _) = ui.allocate_exact_size(egui::vec2(64.0, 32.0), egui::Sense::hover());
         crate::brand::paint_mark(ui, r);
+        ui.add_space(8.0);
         ui.vertical(|ui| {
-            ui.label(egui::RichText::new("VectorCraft").font(theme::semibold(22.0)));
-            ui.label(crate::i18n::fmt(
-                tl!("Version {version} — open-source vector illustration in pure Rust."),
-                &[("version", env!("CARGO_PKG_VERSION"))],
-            ));
+            ui.label(egui::RichText::new("SVGCode").font(theme::semibold(22.0)).color(t.text));
+            ui.label(
+                egui::RichText::new(crate::i18n::fmt(
+                    tl!("Version {version} — Professional SVG Vector Editor"),
+                    &[("version", env!("CARGO_PKG_VERSION"))],
+                ))
+                .size(12.0)
+                .color(t.text_dim),
+            );
         });
     });
-    ui.add_space(12.0);
-    crate::community::links(app, ui);
-    ui.add_space(12.0);
+    ui.add_space(14.0);
+    ui.label(
+        egui::RichText::new(tl!("Created and maintained by SVGCode (https://svgcode.com)"))
+            .font(theme::semibold(13.0))
+            .color(t.text),
+    );
+    ui.add_space(6.0);
     ui.label(
         egui::RichText::new(tl!(
-            "Part of ArtCraft. MIT OR Apache-2.0. Fonts: Source Sans 3, Inter, JetBrains Mono (OFL). Icons: Lucide (ISC) + VectorCraft."
+            "An open, browser-native vector design and SVG code workspace created to make vector editing fast, private, and accessible to everyone 100% in your browser."
         ))
-        .size(11.0),
+        .size(11.5)
+        .color(t.text_dim),
+    );
+    ui.add_space(10.0);
+    ui.label(
+        egui::RichText::new(tl!(
+            "Engine: Powered by WebAssembly & Rust · MIT / Apache-2.0 · Special thanks to the ArtCraft open-source community."
+        ))
+        .size(10.5)
+        .color(t.text_dim),
     );
     // The GPU the window renders with, for bug reports (Preferences › Performance picks it).
     if let Some(adapter) = &app.graphics_adapter {
-        ui.add_space(6.0);
-        ui.label(egui::RichText::new(crate::i18n::fmt(tl!("Graphics: {adapter}"), &[("adapter", adapter.as_str())])).size(11.0));
+        ui.add_space(8.0);
+        ui.label(egui::RichText::new(crate::i18n::fmt(tl!("Graphics: {adapter}"), &[("adapter", adapter.as_str())])).size(11.0).color(t.text_dim));
     }
 }

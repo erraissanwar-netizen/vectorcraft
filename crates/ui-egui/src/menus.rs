@@ -279,7 +279,7 @@ pub const UI_COMMANDS: &[(&str, &str, &str, &str)] = &[
         "",
         "{} opens the Save PDF dialog; with params = document.exportPdf options written to path (asked when missing; viewAfterSaving opens the file) → {path, bytes, warnings}",
     ),
-    ("help.about", "About VectorCraft", "", "{}"),
+    ("help.about", "About SVGCode", "", "{}"),
     ("help.commandPalette", "Search Commands…", "Cmd+Shift+/", "{}"),
     ("app.quit", "Quit VectorCraft", "Cmd+Q", "{}"),
     (
@@ -1873,21 +1873,6 @@ pub fn menu_tree() -> Vec<(&'static str, Vec<Item>)> {
     let panel = |label: &'static str, id: &'static str| cp(label, "window.panel", json!({ "panel": id }));
     vec![
         (
-            "Preferences",
-            vec![
-                c("Settings…", "edit.preferences"),
-                sub(
-                    "Language",
-                    std::iter::once(cp("Automatic", "app.language", json!({"lang": "auto"})))
-                        .chain(std::iter::once(Sep))
-                        .chain(crate::i18n::Lang::all().map(|l| cp(l.name(), "app.language", json!({"lang": l.code()}))))
-                        .collect(),
-                ),
-                Sep,
-                sub("UI Brightness", Brightness::ALL.iter().map(|b| cp(b.label(), "window.brightness", json!({"brightness": b.id()}))).collect()),
-            ],
-        ),
-        (
             "File",
             vec![
                 c("New…", "file.newDialog"),
@@ -2492,6 +2477,23 @@ pub fn menu_tree() -> Vec<(&'static str, Vec<Item>)> {
                 sub("Symbol Libraries", library_placeholders()),
             ],
         ),
+        (
+            "Preferences",
+            vec![
+                c("About SVGCode", "help.about"),
+                Sep,
+                c("Settings…", "edit.preferences"),
+                sub(
+                    "Language",
+                    std::iter::once(cp("Automatic", "app.language", json!({"lang": "auto"})))
+                        .chain(std::iter::once(Sep))
+                        .chain(crate::i18n::Lang::all().map(|l| cp(l.name(), "app.language", json!({"lang": l.code()}))))
+                        .collect(),
+                ),
+                Sep,
+                sub("UI Brightness", Brightness::ALL.iter().map(|b| cp(b.label(), "window.brightness", json!({"brightness": b.id()}))).collect()),
+            ],
+        ),
     ]
 }
 
@@ -2673,11 +2675,7 @@ pub fn menu_bar(app: &mut VectorcraftApp, ui: &mut egui::Ui) -> f32 {
         .ui(ui, |ui| {
             let mut titles = Vec::with_capacity(tree.len());
             for (i, (title, items)) in tree.iter().enumerate() {
-                let text = if i == 0 {
-                    egui::RichText::new(tl!(title)).font(theme::semibold(13.0)).color(t.text)
-                } else {
-                    egui::RichText::new(tl!(title)).size(13.0).color(t.text)
-                };
+                let text = egui::RichText::new(tl!(title)).size(13.0).color(t.text);
                 titles.push(ui.menu_button(text, |ui| menu_body(app, ui, items, &mut clicked)).response);
             }
             (ui.cursor().min.x, switch_on_hover(ui.ctx(), &titles))

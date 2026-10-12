@@ -26,7 +26,10 @@ pub fn app_bar(app: &mut VectorcraftApp, ui: &mut Ui) {
         }
         ui.horizontal_centered(|ui| {
             // Brand mark: SVGCode logo.
-            let (r, _) = ui.allocate_exact_size(vec2(64.0, 32.0), Sense::hover());
+            let (r, resp) = ui.allocate_exact_size(vec2(64.0, 32.0), Sense::click());
+            if resp.clicked() {
+                app.ui.about = true;
+            }
             crate::brand::paint_mark(ui, r);
             ui.add_space(6.0);
             let on_home = menus::home_showing(app);
