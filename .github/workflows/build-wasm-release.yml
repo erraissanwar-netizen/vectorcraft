@@ -46,9 +46,9 @@ jobs:
       - name: Package Runtime Bundle
         run: |
           mkdir -p dist-runtime
-          cp -r dist/web/* dist-runtime/
+          cp -r dist/web/. dist-runtime/
           cd dist-runtime
-          tar -czvf ../vectorcraft-web-runtime.tar.gz *
+          tar -czvf ../vectorcraft-web-runtime.tar.gz .
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
