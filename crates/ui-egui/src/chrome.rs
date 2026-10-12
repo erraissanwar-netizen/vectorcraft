@@ -2,7 +2,7 @@
 
 use std::borrow::Cow;
 
-use egui::{CornerRadius, Sense, Stroke, StrokeKind, Ui, vec2};
+use egui::{Color32, CornerRadius, Sense, Stroke, StrokeKind, Ui, vec2};
 use serde_json::json;
 use vectorcraft_doc::NodeKind;
 

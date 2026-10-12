@@ -4,7 +4,7 @@
 //! tools out in one or two columns.
 //! Bottom: fill/stroke proxy, colour/gradient/none, drawing modes, screen mode, Edit Toolbar.
 
-use egui::{Color32, CornerRadius, Sense, Stroke, Ui, pos2, vec2};
+use egui::{Color32, CornerRadius, Sense, Stroke, StrokeKind, Ui, pos2, vec2};
 use serde_json::json;
 use vectorcraft_color::Paint;
 use vectorcraft_tools::{TOOL_GROUPS, ToolInfo, tool_info};
