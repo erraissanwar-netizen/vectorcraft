@@ -99,7 +99,7 @@ pub(super) fn text_edit(ui: &mut egui::Ui, d: &mut Dialog, key: &str, width: f32
     let r = egui::Frame::NONE
         .fill(t.input)
         .stroke(egui::Stroke::new(1.0, t.input_border))
-        .corner_radius(egui::CornerRadius::same(3))
+        .corner_radius(egui::CornerRadius::same(6))
         .inner_margin(egui::Margin::symmetric(6, 3))
         .show(ui, |ui| ui.add(egui::TextEdit::singleline(&mut s).id(id).frame(egui::Frame::NONE).desired_width(width)));
     if r.inner.changed() {
@@ -116,7 +116,7 @@ pub(super) fn text_area(ui: &mut egui::Ui, d: &mut Dialog, key: &str, width: f32
     let r = egui::Frame::NONE
         .fill(t.input)
         .stroke(egui::Stroke::new(1.0, t.input_border))
-        .corner_radius(egui::CornerRadius::same(3))
+        .corner_radius(egui::CornerRadius::same(6))
         .inner_margin(egui::Margin::symmetric(6, 3))
         .show(ui, |ui| ui.add(egui::TextEdit::multiline(&mut s).frame(egui::Frame::NONE).desired_width(width).desired_rows(rows)));
     if r.inner.changed() {

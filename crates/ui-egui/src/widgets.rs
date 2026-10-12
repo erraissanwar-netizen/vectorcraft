@@ -40,7 +40,7 @@ pub fn flat_button(ui: &mut Ui, text: &str, width: f32) -> Response {
     flat_fill(ui, rect, &resp);
     ui.painter().rect_stroke(
         rect,
-        CornerRadius::same(2),
+        CornerRadius::same(6),
         Stroke::new(1.0, if resp.hovered() { t.text } else { t.button_border }),
         StrokeKind::Inside,
     );
@@ -65,7 +65,7 @@ pub fn split_button(ui: &mut Ui, text: &str, width: f32) -> (Response, Response)
     flat_fill(ui, main_rect, &main);
     flat_fill(ui, arrow_rect, &arrow);
     let border = if main.hovered() || arrow.hovered() { t.text } else { t.button_border };
-    ui.painter().rect_stroke(rect, CornerRadius::same(2), Stroke::new(1.0, border), StrokeKind::Inside);
+    ui.painter().rect_stroke(rect, CornerRadius::same(6), Stroke::new(1.0, border), StrokeKind::Inside);
     ui.painter().vline(split, rect.y_range().shrink(4.0), Stroke::new(1.0, t.button_border));
     ui.painter().with_clip_rect(main_rect).text(
         main_rect.center(),
@@ -82,9 +82,9 @@ pub fn split_button(ui: &mut Ui, text: &str, width: f32) -> (Response, Response)
 fn flat_fill(ui: &Ui, rect: Rect, resp: &Response) {
     let t = Tokens::get(ui.ctx());
     if resp.is_pointer_button_down_on() {
-        ui.painter().rect_filled(rect, CornerRadius::same(2), t.tool_active);
+        ui.painter().rect_filled(rect, CornerRadius::same(6), t.tool_active);
     } else if resp.hovered() {
-        ui.painter().rect_filled(rect, CornerRadius::same(2), t.hover);
+        ui.painter().rect_filled(rect, CornerRadius::same(6), t.hover);
     }
 }
 
@@ -188,7 +188,7 @@ pub fn num_field(ui: &mut Ui, id: impl std::hash::Hash + std::fmt::Debug, value:
             let framed = egui::Frame::NONE
                 .fill(t.input)
                 .stroke(Stroke::new(1.0, if editing { t.accent } else { t.input_border }))
-                .corner_radius(CornerRadius::same(2))
+                .corner_radius(CornerRadius::same(6))
                 .inner_margin(egui::Margin::symmetric(6, 4))
                 .show(ui, |ui| {
                     ui.add(
@@ -342,7 +342,7 @@ fn recessed_text(ui: &mut Ui, id: egui::Id, shown: &str, width: f32, rows: usize
             let framed = egui::Frame::NONE
                 .fill(t.input)
                 .stroke(Stroke::new(1.0, if editing { t.accent } else { t.input_border }))
-                .corner_radius(CornerRadius::same(2))
+                .corner_radius(CornerRadius::same(6))
                 .inner_margin(egui::Margin::symmetric(6, 4))
                 .show(ui, |ui| {
                     let edit = if rows > 1 { egui::TextEdit::multiline(&mut buf).desired_rows(rows) } else { egui::TextEdit::singleline(&mut buf) };
@@ -519,7 +519,7 @@ pub fn chip_button(ui: &mut Ui, size: f32, chevron: bool, draw: impl FnOnce(&Ui,
     let (r, resp) = ui.allocate_exact_size(vec2(if chevron { size + 16.0 } else { size }, size), Sense::click());
     let chip = Rect::from_min_size(r.min, vec2(size, size)).shrink(2.0);
     draw(ui, chip);
-    ui.painter().rect_stroke(chip, 0.0, Stroke::new(1.0, t.input_border), StrokeKind::Outside);
+    ui.painter().rect_stroke(chip, CornerRadius::same(5), Stroke::new(1.0, t.input_border), StrokeKind::Outside);
     if chevron {
         icons::paint(ui, "chevron-down", Rect::from_center_size(pos2(chip.right() + 9.0, r.center().y), vec2(12.0, 12.0)), t.text_dim);
     }
@@ -654,7 +654,7 @@ pub(crate) fn combo<R>(
     egui::Frame::NONE
         .fill(t.input)
         .stroke(Stroke::new(1.0, t.input_border))
-        .corner_radius(CornerRadius::same(3))
+        .corner_radius(CornerRadius::same(6))
         .show(ui, |ui| {
             if searchable {
                 return searchable_combo(ui, ui.id().with(id), current, width - 4.0, list);
@@ -981,8 +981,8 @@ fn check_row(ui: &mut Ui, label: &str, value: Option<bool>, enabled: bool) -> (b
     let t = Tokens::get(ui.ctx());
     let (bx, resp, border) = choice_row(ui, label, enabled);
     let checked = value == Some(true);
-    ui.painter().rect_filled(bx, CornerRadius::same(2), if checked && enabled { t.accent_strong } else { t.input });
-    ui.painter().rect_stroke(bx, CornerRadius::same(2), Stroke::new(1.0, border), StrokeKind::Inside);
+    ui.painter().rect_filled(bx, CornerRadius::same(4), if checked && enabled { t.accent_strong } else { t.input });
+    ui.painter().rect_stroke(bx, CornerRadius::same(4), Stroke::new(1.0, border), StrokeKind::Inside);
     match value {
         Some(true) => {
             let c = if enabled { Color32::WHITE } else { t.text_disabled };
@@ -1102,8 +1102,8 @@ fn spin_generic(
     ui.scope(|ui| {
         ui.spacing_mut().item_spacing.x = 0.0;
         let (sr, sresp) = ui.allocate_exact_size(vec2(16.0, h), Sense::click());
-        ui.painter().rect_filled(sr, CornerRadius { nw: 2, sw: 2, ne: 0, se: 0 }, t.input);
-        ui.painter().rect_stroke(sr, CornerRadius { nw: 2, sw: 2, ne: 0, se: 0 }, Stroke::new(1.0, t.input_border), StrokeKind::Inside);
+        ui.painter().rect_filled(sr, CornerRadius { nw: 6, sw: 6, ne: 0, se: 0 }, t.input);
+        ui.painter().rect_stroke(sr, CornerRadius { nw: 6, sw: 6, ne: 0, se: 0 }, Stroke::new(1.0, t.input_border), StrokeKind::Inside);
         let up = Rect::from_min_max(sr.min, pos2(sr.right(), sr.center().y));
         let down = Rect::from_min_max(pos2(sr.left(), sr.center().y), sr.max);
         let hover = sresp.hover_pos();
@@ -1338,7 +1338,7 @@ pub fn search_field(ui: &mut Ui, id: egui::Id, hint: &str) -> String {
     egui::Frame::NONE
         .fill(t.input)
         .stroke(Stroke::new(1.0, t.input_border))
-        .corner_radius(egui::CornerRadius::same(2))
+        .corner_radius(egui::CornerRadius::same(6))
         .inner_margin(egui::Margin::symmetric(8, 5))
         .show(ui, |ui| {
             ui.add(
@@ -1356,7 +1356,7 @@ pub fn search_field(ui: &mut Ui, id: egui::Id, hint: &str) -> String {
 /// A bordered list box (Swatches tiles, Appearance rows, Artboards list).
 pub fn list_box<R>(ui: &mut Ui, add: impl FnOnce(&mut Ui) -> R) -> R {
     let t = Tokens::get(ui.ctx());
-    egui::Frame::NONE.stroke(Stroke::new(1.0, t.input_border)).inner_margin(egui::Margin::same(1)).show(ui, add).inner
+    egui::Frame::NONE.stroke(Stroke::new(1.0, t.input_border)).corner_radius(CornerRadius::same(6)).inner_margin(egui::Margin::same(1)).show(ui, add).inner
 }
 
 /// A bottom button bar separated from the content by a divider (panel footers).
@@ -1396,7 +1396,7 @@ pub fn opt_field(ui: &mut Ui, id: impl std::hash::Hash + std::fmt::Debug, value:
     let framed = egui::Frame::NONE
         .fill(t.input)
         .stroke(Stroke::new(1.0, if editing { t.accent } else { t.input_border }))
-        .corner_radius(CornerRadius::same(2))
+        .corner_radius(CornerRadius::same(6))
         .inner_margin(egui::Margin::symmetric(4, 4))
         .show(ui, |ui| {
             ui.add(
@@ -1665,7 +1665,7 @@ pub fn orientation_button(ui: &mut Ui, landscape: bool, selected: bool, tip: &st
     let t = Tokens::get(ui.ctx());
     let (rect, resp) = ui.allocate_exact_size(Vec2::splat(26.0), Sense::click());
     if resp.hovered() && !selected {
-        ui.painter().rect_filled(rect, CornerRadius::same(3), t.hover);
+        ui.painter().rect_filled(rect, CornerRadius::same(6), t.hover);
     }
     let size = if landscape { vec2(16.0, 12.0) } else { vec2(12.0, 16.0) };
     let page = Rect::from_center_size(rect.center(), size);
@@ -1700,8 +1700,8 @@ pub fn region_texture(
 fn chevron_cell(ui: &mut Ui, h: f32) -> Response {
     let t = Tokens::get(ui.ctx());
     let (dr, dresp) = ui.allocate_exact_size(vec2(20.0, h), Sense::click());
-    ui.painter().rect_filled(dr, CornerRadius { nw: 0, sw: 0, ne: 2, se: 2 }, t.input);
-    ui.painter().rect_stroke(dr, CornerRadius { nw: 0, sw: 0, ne: 2, se: 2 }, Stroke::new(1.0, t.input_border), StrokeKind::Inside);
+    ui.painter().rect_filled(dr, CornerRadius { nw: 0, sw: 0, ne: 6, se: 6 }, t.input);
+    ui.painter().rect_stroke(dr, CornerRadius { nw: 0, sw: 0, ne: 6, se: 6 }, Stroke::new(1.0, t.input_border), StrokeKind::Inside);
     let c = if !ui.is_enabled() {
         t.text_disabled
     } else if dresp.hovered() {

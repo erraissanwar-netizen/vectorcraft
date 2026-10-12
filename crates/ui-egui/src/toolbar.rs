@@ -459,8 +459,9 @@ fn raise_floating(ctx: &egui::Context, key: &str) {
 fn flyout_frame(t: &Tokens, flash: bool) -> egui::Frame {
     egui::Frame::NONE
         .fill(t.panel)
-        .stroke(if flash { Stroke::new(1.5, t.accent) } else { Stroke::new(1.0, t.input_border) })
-        .shadow(egui::epaint::Shadow { offset: [0, 3], blur: 10, spread: 0, color: Color32::from_black_alpha(90) })
+        .corner_radius(CornerRadius::same(8))
+        .stroke(if flash { Stroke::new(1.5, t.accent) } else { Stroke::new(1.0, t.border) })
+        .shadow(egui::epaint::Shadow { offset: [0, 4], blur: 16, spread: 0, color: Color32::from_black_alpha(80) })
 }
 
 /// What a press on a flyout did.
@@ -485,7 +486,7 @@ fn flyout_body(ui: &mut Ui, t: &Tokens, active: &str, tools: &[String], floating
         let rows = if floating { ui.horizontal(|ui| tool_strip(ui, t, active, tools)) } else { ui.vertical(|ui| tool_rows(ui, t, active, tools)) };
         out.chosen = rows.inner;
         let (bar, _) = ui.allocate_exact_size(vec2(BAR, rows.response.rect.height()), Sense::hover());
-        ui.painter().rect_filled(bar, 0.0, t.tab_strip);
+        ui.painter().rect_filled(bar, CornerRadius { nw: 0, ne: 8, sw: 0, se: 8 }, t.tab_strip);
         let grip = if floating {
             let x = egui::Rect::from_min_size(bar.min, vec2(BAR, CLOSE));
             let xr = ui.interact(x, egui::Id::new(("tool-flyout-close", key)), Sense::click());
@@ -522,10 +523,10 @@ fn tool_rows(ui: &mut Ui, t: &Tokens, active: &str, tools: &[String]) -> Option<
         let is_active = active == tool.id;
         let (r, resp) = ui.allocate_exact_size(vec2(w, 30.0), Sense::click());
         if resp.hovered() {
-            ui.painter().rect_filled(r, 0.0, t.hover);
+            ui.painter().rect_filled(r.shrink2(vec2(3.0, 1.0)), CornerRadius::same(6), t.hover);
         }
         if is_active {
-            ui.painter().rect_filled(egui::Rect::from_center_size(r.left_center() + vec2(12.0, 0.0), vec2(5.0, 5.0)), 0.0, t.text);
+            ui.painter().rect_filled(egui::Rect::from_center_size(r.left_center() + vec2(12.0, 0.0), vec2(5.0, 5.0)), CornerRadius::same(2.5), t.accent);
         }
         let ir = egui::Rect::from_min_size(r.min + vec2(24.0, 6.0), vec2(18.0, 18.0));
         icons::paint(ui, icons::tool_icon(tool.icon), ir, t.icon);

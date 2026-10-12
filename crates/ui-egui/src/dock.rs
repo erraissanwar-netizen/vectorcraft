@@ -244,15 +244,15 @@ pub fn floating_panel(app: &mut VectorcraftApp, ctx: &egui::Context) {
     let mut torn = None;
     let area = egui::Area::new(egui::Id::new("icon-panel")).order(egui::Order::Foreground).pivot(egui::Align2::RIGHT_TOP);
     area.fixed_pos(egui::pos2(right, FLYOUT_TOP)).show(ctx, |ui| {
-        egui::Frame::popup(ui.style()).fill(t.panel).corner_radius(CornerRadius::same(4)).inner_margin(egui::Margin::ZERO).show(ui, |ui| {
+        egui::Frame::popup(ui.style()).fill(t.panel).corner_radius(CornerRadius::same(8)).inner_margin(egui::Margin::ZERO).show(ui, |ui| {
             ui.set_width(width);
             let (strip, _) = ui.allocate_exact_size(vec2(width, 26.0), Sense::hover());
-            ui.painter().rect_filled(strip, CornerRadius { nw: 4, ne: 4, sw: 0, se: 0 }, t.panel_darker);
+            ui.painter().rect_filled(strip, CornerRadius { nw: 8, ne: 8, sw: 0, se: 0 }, t.panel_darker);
             let title = Rect::from_min_size(
                 strip.min,
                 vec2(ui.painter().layout_no_wrap(tl!(label).to_string(), theme::semibold(12.0), t.text).size().x + 24.0, 26.0),
             );
-            ui.painter().rect_filled(title, CornerRadius { nw: 4, ne: 0, sw: 0, se: 0 }, t.panel);
+            ui.painter().rect_filled(title, CornerRadius { nw: 8, ne: 0, sw: 0, se: 0 }, t.panel);
             ui.painter().text(title.left_center() + vec2(12.0, 0.0), egui::Align2::LEFT_CENTER, tl!(label), theme::semibold(12.0), t.text);
             let close = Rect::from_center_size(strip.right_center() - vec2(13.0, 0.0), vec2(14.0, 14.0));
             let cr = ui.interact(close, ui.id().with("close-panel"), Sense::click());

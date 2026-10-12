@@ -303,7 +303,7 @@ pub fn show(app: &mut VectorcraftApp, ctx: &egui::Context) {
         let tall = (screen.bottom() - pos.y - TITLE - STRIP - 60.0).clamp(120.0, 560.0);
         let lone = ids.len() == 1;
         egui::Area::new(area).order(egui::Order::Middle).fixed_pos(pos).show(ctx, |ui| {
-            let frame = egui::Frame::popup(ui.style()).fill(t.panel).corner_radius(CornerRadius::same(4)).inner_margin(egui::Margin::ZERO);
+            let frame = egui::Frame::popup(ui.style()).fill(t.panel).corner_radius(CornerRadius::same(8)).inner_margin(egui::Margin::ZERO);
             frame.show(ui, |ui| {
                 ui.spacing_mut().item_spacing = Vec2::ZERO;
                 let tabs: Vec<_> = ids
@@ -319,7 +319,7 @@ pub fn show(app: &mut VectorcraftApp, ctx: &egui::Context) {
                 ui.set_width(width);
                 // Title bar: a grip that moves the group, and the × that docks it.
                 let (bar, _) = ui.allocate_exact_size(vec2(width, TITLE), Sense::hover());
-                ui.painter().rect_filled(bar, CornerRadius { nw: 4, ne: 4, sw: 0, se: 0 }, t.tab_strip);
+                ui.painter().rect_filled(bar, CornerRadius { nw: 8, ne: 8, sw: 0, se: 0 }, t.tab_strip);
                 let close = Rect::from_center_size(bar.right_center() - vec2(10.0, 0.0), vec2(TITLE, TITLE));
                 let grip = ui.interact(Rect::from_min_max(bar.min, pos2(close.left(), bar.bottom())), ui.id().with("title"), Sense::drag());
                 for k in 0..2 {
