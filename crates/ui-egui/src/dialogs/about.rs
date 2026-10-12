@@ -49,7 +49,7 @@ pub(super) fn show(app: &mut VectorcraftApp, ctx: &egui::Context) {
 fn about_tab(app: &mut VectorcraftApp, ui: &mut egui::Ui) {
     ui.set_width(380.0);
     ui.horizontal(|ui| {
-        let (r, _) = ui.allocate_exact_size(egui::vec2(44.0, 44.0), egui::Sense::hover());
+        let (r, _) = ui.allocate_exact_size(egui::vec2(64.0, 32.0), egui::Sense::hover());
         crate::brand::paint_mark(ui, r);
         ui.vertical(|ui| {
             ui.label(egui::RichText::new("VectorCraft").font(theme::semibold(22.0)));

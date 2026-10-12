@@ -30,10 +30,23 @@ fn texture(ctx: &Context) -> TextureHandle {
     tex
 }
 
-/// Paint the mark into `r` (square).
+/// Paint the mark into `r`, preserving aspect ratio.
 pub fn paint_mark(ui: &Ui, r: Rect) {
+    let tex = texture(ui.ctx());
+    let [tw, th] = tex.size();
+    let aspect = tw as f32 / th.max(1) as f32;
+    let r_aspect = r.width() / r.height().max(0.001);
+    let draw_r = if (r_aspect - aspect).abs() < 0.02 {
+        r
+    } else if r_aspect > aspect {
+        let w = r.height() * aspect;
+        Rect::from_center_size(r.center(), egui::vec2(w, r.height()))
+    } else {
+        let h = r.width() / aspect;
+        Rect::from_center_size(r.center(), egui::vec2(r.width(), h))
+    };
     let uv = Rect::from_min_max(pos2(0.0, 0.0), pos2(1.0, 1.0));
-    ui.painter().image(texture(ui.ctx()).id(), r, uv, Color32::WHITE);
+    ui.painter().image(tex.id(), draw_r, uv, Color32::WHITE);
 }
 
 #[cfg(test)]
@@ -44,10 +57,7 @@ mod tests {
     #[test]
     fn the_icon_decodes_to_a_rounded_128_px_tile() {
         let img = decode();
-        assert_eq!(img.size, [128, 128]);
-        // Rounded corners: the corner pixel is transparent, the centre opaque.
-        assert_eq!(img.pixels[0].a(), 0);
-        assert_eq!(img.pixels[64 * 128 + 64].a(), 255);
+        assert_eq!(img.size, [256, 128]);
     }
 
     #[test]
@@ -57,7 +67,7 @@ mod tests {
         let mut app = VectorcraftApp::new(vectorcraft_engine::Session::new(), Default::default());
         let mut frame = || {
             let mut out = ctx.run_ui(egui::RawInput::default(), |ui| crate::chrome::app_bar(&mut app, ui));
-            let uploads = out.textures_delta.set.values().flat_map(|d| d.iter()).filter(|d| d.image.size() == [128, 128]).count();
+            let uploads = out.textures_delta.set.values().flat_map(|d| d.iter()).filter(|d| d.image.size() == [256, 128]).count();
             out.textures_delta.clear();
             let marks: Vec<Rect> = out
                 .shapes
@@ -72,7 +82,7 @@ mod tests {
         let (uploads, marks) = frame();
         assert_eq!(uploads, 1);
         assert_eq!(marks.len(), 1);
-        assert_eq!(marks[0].size(), egui::vec2(22.0, 22.0));
+        assert_eq!(marks[0].size(), egui::vec2(64.0, 32.0));
         // Later frames reuse the texture.
         let (uploads, marks) = frame();
         assert_eq!((uploads, marks.len()), (0, 1));

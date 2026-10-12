@@ -25,10 +25,10 @@ pub fn app_bar(app: &mut VectorcraftApp, ui: &mut Ui) {
             titlebar::drag_area(ui, ui.max_rect());
         }
         ui.horizontal_centered(|ui| {
-            // Brand mark: the app icon.
-            let (r, _) = ui.allocate_exact_size(vec2(22.0, 22.0), Sense::hover());
+            // Brand mark: SVGCode logo.
+            let (r, _) = ui.allocate_exact_size(vec2(64.0, 32.0), Sense::hover());
             crate::brand::paint_mark(ui, r);
-            ui.add_space(4.0);
+            ui.add_space(6.0);
             let on_home = menus::home_showing(app);
             if widgets::icon_button(ui, "house", tl!("Home"), on_home, 24.0).clicked() {
                 app.run("app.home", json!({})).ok();
