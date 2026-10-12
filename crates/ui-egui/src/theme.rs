@@ -188,27 +188,28 @@ impl Tokens {
             },
             Brightness::Light => Tokens {
                 tab_strip: hex(0xf5f3f0),
-                text_strong: hex(0x0f172a),
+                text_strong: hex(0x18181b),
                 button_border: hex(0xe8e5e1),
                 dark: false,
                 app_bar: hex(0xfdfcfb),
-                panel: hex(0xfaf7f4),
+                panel: hex(0xfaf8f6),
                 panel_darker: hex(0xf5f3f0),
                 input: hex(0xfdfdfd),
                 input_border: hex(0xe8e5e1),
                 border: hex(0xe8e5e1),
                 divider: hex(0xe8e5e1),
-                text: hex(0x0f172a),
-                text_dim: hex(0x64748b),
-                text_disabled: hex(0x94a3b8),
-                icon: hex(0x0f172a),
+                text: hex(0x18181b),
+                text_dim: hex(0x71717a),
+                text_disabled: hex(0xa1a1aa),
+                icon: hex(0x18181b),
                 hover: hex(0xefece8),
                 tool_active: hex(0xefece8),
                 row_selected: hex(0xefece8),
                 pasteboard: hex(0xe5e2dc),
                 ruler: hex(0xf5f3f0),
-                ruler_tick: hex(0x64748b),
+                ruler_tick: hex(0x71717a),
                 button: hex(0xf5f3f0),
+                radius: 6,
                 ..base
             },
         }
@@ -350,14 +351,14 @@ pub fn apply_tokens(ctx: &egui::Context, t: Tokens) {
     v.extreme_bg_color = t.input;
     v.faint_bg_color = t.panel_darker;
     v.window_stroke = Stroke::new(1.0, t.border);
-    v.window_corner_radius = CornerRadius::same(6);
-    v.menu_corner_radius = CornerRadius::same(6);
-    v.selection.bg_fill = t.accent.gamma_multiply(0.55);
+    v.window_corner_radius = CornerRadius::same(8);
+    v.menu_corner_radius = CornerRadius::same(8);
+    v.selection.bg_fill = t.accent.gamma_multiply(0.20);
     v.selection.stroke = Stroke::new(1.0, t.accent);
     v.hyperlink_color = t.accent;
     v.override_text_color = Some(t.text);
-    v.popup_shadow = egui::epaint::Shadow { offset: [0, 4], blur: 14, spread: 0, color: Color32::from_black_alpha(if t.dark { 120 } else { 60 }) };
-    v.window_shadow = egui::epaint::Shadow { offset: [0, 8], blur: 28, spread: 0, color: Color32::from_black_alpha(if t.dark { 140 } else { 70 }) };
+    v.popup_shadow = egui::epaint::Shadow { offset: [0, 4], blur: 16, spread: 0, color: Color32::from_black_alpha(if t.dark { 120 } else { 35 }) };
+    v.window_shadow = egui::epaint::Shadow { offset: [0, 8], blur: 28, spread: 0, color: Color32::from_black_alpha(if t.dark { 140 } else { 45 }) };
     let w = &mut v.widgets;
     for (wv, fill) in [
         (&mut w.noninteractive, t.panel),
@@ -368,7 +369,7 @@ pub fn apply_tokens(ctx: &egui::Context, t: Tokens) {
     ] {
         wv.bg_fill = fill;
         wv.weak_bg_fill = fill;
-        wv.corner_radius = t.cr();
+        wv.corner_radius = CornerRadius::same(6);
         wv.fg_stroke = Stroke::new(1.0, t.text);
     }
     w.noninteractive.bg_stroke = Stroke::new(1.0, t.divider);
@@ -378,15 +379,15 @@ pub fn apply_tokens(ctx: &egui::Context, t: Tokens) {
     ctx.set_visuals(v);
     ctx.global_style_mut(|s| {
         s.spacing.item_spacing = egui::vec2(6.0, 5.0);
-        s.spacing.button_padding = egui::vec2(6.0, 2.0);
+        s.spacing.button_padding = egui::vec2(8.0, 3.5);
         s.spacing.interact_size = egui::vec2(24.0, 24.0);
         s.spacing.menu_margin = egui::Margin::same(6);
         s.spacing.slider_width = 120.0;
         s.text_styles = [
-            (TextStyle::Small, FontId::proportional(11.0)),
-            (TextStyle::Body, FontId::proportional(13.0)),
-            (TextStyle::Button, FontId::proportional(13.0)),
-            (TextStyle::Heading, FontId::new(15.0, FontFamily::Name(FONT_UI_SEMIBOLD.into()))),
+            (TextStyle::Small, FontId::new(11.0, FontFamily::Proportional)),
+            (TextStyle::Body, FontId::new(13.0, FontFamily::Proportional)),
+            (TextStyle::Button, FontId::new(13.0, FontFamily::Proportional)),
+            (TextStyle::Heading, FontId::new(14.0, FontFamily::Name(FONT_UI_SEMIBOLD.into()))),
             (TextStyle::Monospace, FontId::new(11.5, FontFamily::Name(FONT_MONO.into()))),
         ]
         .into();

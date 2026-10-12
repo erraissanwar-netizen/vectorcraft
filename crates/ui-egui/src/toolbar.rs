@@ -199,17 +199,22 @@ fn body(app: &mut VectorcraftApp, ui: &mut Ui, cols: usize, floating: Option<egu
                     let Some(shown) = tool_info(&shown_id).or_else(|| tool_info(slot[0])) else { continue };
                     let is_active = slot.contains(&active);
                     let (rect, resp) = ui.allocate_exact_size(vec2(36.0, PITCH - 1.0), Sense::click_and_drag());
-                    let well = egui::Rect::from_center_size(rect.center(), vec2(35.5, 27.5));
+                    let well = egui::Rect::from_center_size(rect.center(), vec2(33.0, 28.0));
                     if is_active {
-                        ui.painter().rect_filled(well, CornerRadius::same(1), t.tool_active);
+                        // Glowing color and effect matching homepage sidebar (#FF5100 glow aura + ring)
+                        ui.painter().rect_filled(well.expand(1.5), CornerRadius::same(7), Color32::from_rgba_unmultiplied(255, 81, 0, 32));
+                        ui.painter().rect_filled(well, CornerRadius::same(6), Color32::from_rgba_unmultiplied(255, 81, 0, 48));
+                        ui.painter().rect_stroke(well, CornerRadius::same(6), Stroke::new(1.0, Color32::from_rgba_unmultiplied(255, 81, 0, 180)), egui::StrokeKind::Inside);
                     } else if resp.hovered() {
-                        ui.painter().rect_filled(well, CornerRadius::same(1), t.hover);
+                        ui.painter().rect_filled(well, CornerRadius::same(6), t.hover);
                     }
                     let ir = egui::Rect::from_center_size(rect.center(), vec2(18.0, 18.0));
-                    icons::paint(ui, icons::tool_icon(shown.icon), ir, if is_active { t.text_strong } else { t.icon });
+                    let icon_color = if is_active { t.accent } else if resp.hovered() { t.text_strong } else { t.icon };
+                    icons::paint(ui, icons::tool_icon(shown.icon), ir, icon_color);
                     if slot.len() > 1 {
                         let c = rect.center() + vec2(12.5, 10.0);
-                        ui.painter().add(egui::Shape::convex_polygon(vec![c, c + vec2(-3.5, 0.0), c + vec2(0.0, -3.5)], t.icon, Stroke::NONE));
+                        let arrow_color = if is_active { t.accent } else { t.icon };
+                        ui.painter().add(egui::Shape::convex_polygon(vec![c, c + vec2(-3.5, 0.0), c + vec2(0.0, -3.5)], arrow_color, Stroke::NONE));
                     }
                     let press = if slot.len() > 1 { flyout_press(ui, &resp, rect) } else { None };
                     let alt = ui.input(|inp| inp.modifiers.alt);
@@ -560,13 +565,18 @@ fn tool_strip(ui: &mut Ui, t: &Tokens, active: &str, tools: &[String]) -> Option
     for tool in tools.iter().filter_map(|id| tool_info(id)) {
         let (r, resp) = ui.allocate_exact_size(STRIP_BUTTON, Sense::click());
         let well = r.shrink(1.0);
-        if active == tool.id {
-            ui.painter().rect_filled(well, CornerRadius::same(1), t.tool_active);
+        let is_active = active == tool.id;
+        if is_active {
+            // Glowing color and effect matching homepage sidebar
+            ui.painter().rect_filled(well.expand(1.5), CornerRadius::same(7), Color32::from_rgba_unmultiplied(255, 81, 0, 32));
+            ui.painter().rect_filled(well, CornerRadius::same(6), Color32::from_rgba_unmultiplied(255, 81, 0, 48));
+            ui.painter().rect_stroke(well, CornerRadius::same(6), Stroke::new(1.0, Color32::from_rgba_unmultiplied(255, 81, 0, 180)), egui::StrokeKind::Inside);
         } else if resp.hovered() {
-            ui.painter().rect_filled(well, CornerRadius::same(1), t.hover);
+            ui.painter().rect_filled(well, CornerRadius::same(6), t.hover);
         }
         let ir = egui::Rect::from_center_size(r.center(), vec2(18.0, 18.0));
-        icons::paint(ui, icons::tool_icon(tool.icon), ir, if active == tool.id { t.text_strong } else { t.icon });
+        let icon_color = if is_active { t.accent } else if resp.hovered() { t.text_strong } else { t.icon };
+        icons::paint(ui, icons::tool_icon(tool.icon), ir, icon_color);
         if resp.on_hover_text(tip(tool)).clicked() {
             chosen = Some(tool.id);
         }

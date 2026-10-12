@@ -322,7 +322,7 @@ pub fn doc_tabs(app: &mut VectorcraftApp, ui: &mut Ui) {
     let (strip, _) = ui.allocate_exact_size(vec2(ui.available_width(), 35.0), Sense::hover());
     ui.painter().rect_filled(strip, 0.0, t.tab_strip);
     ui.painter().line_segment([strip.left_bottom(), strip.right_bottom()], Stroke::new(1.0, t.border));
-    let mut x = strip.left();
+    let mut x = strip.left() + 8.0;
     let mut activate = None;
     let mut close = None;
     let active = app.session.active_index();
@@ -331,27 +331,40 @@ pub fn doc_tabs(app: &mut VectorcraftApp, ui: &mut Ui) {
         let title = tab_title(d, zoom, app.ui.view.outline);
         // On the Home screen no tab is the current one.
         let is_active = Some(i) == active && app.ui.home.is_none();
-        let galley = ui.painter().layout_no_wrap(title, theme::semibold(12.5), if is_active { t.text_strong } else { t.text_dim });
-        let w = galley.size().x + 50.0;
-        let r = egui::Rect::from_min_size(egui::pos2(x, strip.top()), vec2(w, strip.height() - 1.0));
+        let galley_measure = ui.painter().layout_no_wrap(title.clone(), theme::semibold(12.5), t.text);
+        let w = galley_measure.size().x + 46.0;
+        let r = egui::Rect::from_min_size(egui::pos2(x, strip.top() + 4.0), vec2(w, strip.height() - 8.0));
         let resp = ui.interact(r, ui.id().with(("tab", i)), Sense::click());
         if is_active {
-            ui.painter().rect_filled(r, 0.0, t.panel);
-        } else if resp.hovered() {
-            ui.painter().rect_filled(r, 0.0, t.hover.gamma_multiply(0.4));
+            // Homepage active tab style: vibrant accent #FF5100, subtle aura, white text
+            ui.painter().rect_filled(r.expand(1.0), CornerRadius::same(6), Color32::from_rgba_unmultiplied(255, 81, 0, 35));
+            ui.painter().rect_filled(r, CornerRadius::same(6), t.accent);
+            ui.painter().rect_stroke(r, CornerRadius::same(6), Stroke::new(1.0, t.accent), StrokeKind::Inside);
+        } else {
+            // Homepage inactive tab style: clean bordered pill with muted text, hover wash
+            let bg = if resp.hovered() { t.hover } else { Color32::TRANSPARENT };
+            let border_color = if resp.hovered() { t.input_border } else { t.border };
+            ui.painter().rect_filled(r, CornerRadius::same(6), bg);
+            ui.painter().rect_stroke(r, CornerRadius::same(6), Stroke::new(1.0, border_color), StrokeKind::Inside);
         }
-        ui.painter().line_segment([r.right_top(), r.right_bottom()], Stroke::new(1.5, t.border));
-        // × at the left like Illustrator.
-        let xr = egui::Rect::from_center_size(egui::pos2(r.left() + 16.0, r.center().y), vec2(12.0, 12.0));
+        // × at the left like Illustrator
+        let xr = egui::Rect::from_center_size(egui::pos2(r.left() + 15.0, r.center().y), vec2(12.0, 12.0));
         let xresp = ui.interact(xr.expand(3.0), ui.id().with(("tabx", i)), Sense::click());
-        icons::paint(ui, "x", xr, if xresp.hovered() { t.text_strong } else { t.text });
-        ui.painter().galley(egui::pos2(r.left() + 32.0, r.center().y - galley.size().y / 2.0), galley, t.text);
+        let x_color = if is_active {
+            if xresp.hovered() { Color32::WHITE } else { Color32::from_rgba_unmultiplied(255, 255, 255, 210) }
+        } else {
+            if xresp.hovered() { t.text } else { t.text_dim }
+        };
+        icons::paint(ui, "x", xr, x_color);
+        let text_color = if is_active { Color32::WHITE } else if resp.hovered() { t.text } else { t.text_dim };
+        let galley = ui.painter().layout_no_wrap(title, theme::semibold(12.5), text_color);
+        ui.painter().galley(egui::pos2(r.left() + 28.0, r.center().y - galley.size().y / 2.0), galley, text_color);
         if xresp.clicked() {
             close = Some(i);
         } else if resp.clicked() {
             activate = Some(i);
         }
-        x += w;
+        x += w + 6.0;
     }
     if let Some(i) = close {
         if let Err(e) = crate::unsaved::close(app, i) {

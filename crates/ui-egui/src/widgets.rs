@@ -18,16 +18,17 @@ pub fn paint_icon_button(ui: &mut Ui, resp: Response, icon: &str, tip: &str, sel
     let t = Tokens::get(ui.ctx());
     let rect = resp.rect;
     let size = rect.width();
-    let bg = if selected {
-        t.tool_active
-    } else if resp.hovered() {
-        t.hover
+    if selected {
+        ui.painter().rect_filled(rect.expand(1.5), CornerRadius::same(6), Color32::from_rgba_unmultiplied(255, 81, 0, 32));
+        ui.painter().rect_filled(rect, CornerRadius::same(5), Color32::from_rgba_unmultiplied(255, 81, 0, 48));
+        ui.painter().rect_stroke(rect, CornerRadius::same(5), Stroke::new(1.0, Color32::from_rgba_unmultiplied(255, 81, 0, 180)), StrokeKind::Inside);
     } else {
-        Color32::TRANSPARENT
-    };
-    ui.painter().rect_filled(rect, CornerRadius::same(3), bg);
+        let bg = if resp.hovered() { t.hover } else { Color32::TRANSPARENT };
+        ui.painter().rect_filled(rect, CornerRadius::same(5), bg);
+    }
     let pad = (size * 0.2).round();
-    icons::paint(ui, icon, rect.shrink(pad), if selected { t.text } else { t.icon });
+    let icon_color = if selected { t.accent } else if resp.hovered() { t.text } else { t.icon };
+    icons::paint(ui, icon, rect.shrink(pad), icon_color);
     if !tip.is_empty() { resp.on_hover_text(tl!(tip)) } else { resp }
 }
 

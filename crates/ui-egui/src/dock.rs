@@ -165,27 +165,37 @@ fn tab_strip(app: &mut VectorcraftApp, ui: &mut Ui, active: DockTab) -> bool {
     let out = ui.input(|i| i.pointer.interact_pos()).is_some_and(|p| !strip.contains(p));
     // What a drag out of the strip floats: the panels, the one shown, where its tab began.
     let mut tear: Option<(Vec<&'static str>, &'static str, f32)> = None;
-    let mut x = strip.left();
+    let mut x = strip.left() + 6.0;
     for tab in DockTab::ALL {
         let (id, label, _) = tab.info();
         if floating::group_of(&app.ui, id).is_some() {
             continue;
         }
-        let galley =
-            ui.painter().layout_no_wrap(tl!(label).to_string(), theme::semibold(12.5), if tab == active { t.text_strong } else { t.text_dim });
-        let r = Rect::from_min_size(egui::pos2(x, strip.top()), vec2(galley.size().x + 24.0, strip.height() - 1.0));
+        let is_tab_active = tab == active;
+        let galley_measure = ui.painter().layout_no_wrap(tl!(label).to_string(), theme::semibold(12.5), t.text);
+        let r = Rect::from_min_size(egui::pos2(x, strip.top() + 4.0), vec2(galley_measure.size().x + 20.0, strip.height() - 8.0));
         let resp = ui.interact(r, ui.id().with(("docktab", label)), Sense::click_and_drag());
-        if tab == active {
-            ui.painter().rect_filled(r, 0.0, t.panel);
+        if is_tab_active {
+            // Homepage active tab style: vibrant accent #FF5100, subtle aura, white text
+            ui.painter().rect_filled(r.expand(1.0), CornerRadius::same(6), Color32::from_rgba_unmultiplied(255, 81, 0, 35));
+            ui.painter().rect_filled(r, CornerRadius::same(6), t.accent);
+            ui.painter().rect_stroke(r, CornerRadius::same(6), Stroke::new(1.0, t.accent), StrokeKind::Inside);
+        } else {
+            // Homepage inactive tab style: clean bordered pill with muted text, hover wash
+            let bg = if resp.hovered() { t.hover } else { Color32::TRANSPARENT };
+            let border_color = if resp.hovered() { t.input_border } else { t.border };
+            ui.painter().rect_filled(r, CornerRadius::same(6), bg);
+            ui.painter().rect_stroke(r, CornerRadius::same(6), Stroke::new(1.0, border_color), StrokeKind::Inside);
         }
-        ui.painter().galley(egui::pos2(r.left() + 12.0, r.center().y - galley.size().y / 2.0), galley, t.text);
-        ui.painter().line_segment([r.right_top(), r.right_bottom()], Stroke::new(1.0, t.border));
+        let text_color = if is_tab_active { Color32::WHITE } else if resp.hovered() { t.text } else { t.text_dim };
+        let galley = ui.painter().layout_no_wrap(tl!(label).to_string(), theme::semibold(12.5), text_color);
+        ui.painter().galley(egui::pos2(r.left() + 10.0, r.center().y - galley.size().y / 2.0), galley, text_color);
         if resp.clicked() {
             app.ui.dock_tab = tab;
         } else if resp.dragged() && out {
             tear = Some((vec![id], id, r.left()));
         }
-        x = r.right();
+        x = r.right() + 4.0;
     }
     let menu = Rect::from_center_size(strip.right_center() - vec2(14.0, 0.0), vec2(16.0, 16.0));
     let rest = Rect::from_min_max(egui::pos2(x, strip.top()), egui::pos2(menu.left() - 4.0, strip.bottom()));
