@@ -646,7 +646,7 @@ impl Default for Prefs {
             plugins_folder: String::new(),
             scratch_primary: s("Startup"),
             scratch_secondary: s("None"),
-            ui_brightness: s("mediumDark"),
+            ui_brightness: s("light"),
             canvas_color: s("matchUi"),
             auto_collapse_icon_panels: false,
             open_documents_as_tabs: true,

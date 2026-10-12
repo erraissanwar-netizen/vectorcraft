@@ -1912,6 +1912,21 @@ pub fn menu_tree() -> Vec<(&'static str, Vec<Item>)> {
                 Sep,
                 c("Package…", "ui.packageDialog"),
                 sub("Scripts", vec![todos("Other Script…", "Cmd+F12")]),
+                sub(
+                    "Preferences",
+                    vec![
+                        c("Settings…", "edit.preferences"),
+                        sub(
+                            "Language",
+                            std::iter::once(cp("Automatic", "app.language", json!({"lang": "auto"})))
+                                .chain(std::iter::once(Sep))
+                                .chain(crate::i18n::Lang::all().map(|l| cp(l.name(), "app.language", json!({"lang": l.code()}))))
+                                .collect(),
+                        ),
+                        Sep,
+                        sub("UI Brightness", Brightness::ALL.iter().map(|b| cp(b.label(), "window.brightness", json!({"brightness": b.id()}))).collect()),
+                    ],
+                ),
                 Sep,
                 c("Document Setup…", "file.documentSetup"),
                 sub(
@@ -1924,6 +1939,8 @@ pub fn menu_tree() -> Vec<(&'static str, Vec<Item>)> {
                 c("File Info…", "file.info"),
                 Sep,
                 c("Print…", "file.print"),
+                Sep,
+                c("About SVGCode", "help.about"),
             ],
         ),
         (
@@ -2475,23 +2492,6 @@ pub fn menu_tree() -> Vec<(&'static str, Vec<Item>)> {
                 sub("Graphic Style Libraries", crate::panels::graphic_styles::window_menu()),
                 sub("Swatch Libraries", crate::panels::swatches::window_menu()),
                 sub("Symbol Libraries", library_placeholders()),
-            ],
-        ),
-        (
-            "Preferences",
-            vec![
-                c("About SVGCode", "help.about"),
-                Sep,
-                c("Settings…", "edit.preferences"),
-                sub(
-                    "Language",
-                    std::iter::once(cp("Automatic", "app.language", json!({"lang": "auto"})))
-                        .chain(std::iter::once(Sep))
-                        .chain(crate::i18n::Lang::all().map(|l| cp(l.name(), "app.language", json!({"lang": l.code()}))))
-                        .collect(),
-                ),
-                Sep,
-                sub("UI Brightness", Brightness::ALL.iter().map(|b| cp(b.label(), "window.brightness", json!({"brightness": b.id()}))).collect()),
             ],
         ),
     ]
