@@ -69,7 +69,7 @@ fn find<'a>(bar: &'a MenuBar, command: &str) -> &'a native_menu::Item {
 fn vectorcraft_gets_a_mac_app_menu() {
     let bar = bar(&app(true));
     let titles: Vec<&str> = bar.menus.iter().map(|m| m.title.as_str()).collect();
-    assert_eq!(titles, ["VectorCraft", "File", "Edit", "Object", "Type", "Select", "Effect", "View", "Window", "Help"]);
+    assert_eq!(titles, ["VectorCraft", "File", "Edit", "Object", "Type", "Select", "Effect", "View", "Window"]);
     let app_menu = &bar.menus[0];
     assert_eq!(app_menu.role, MenuRole::App);
     assert_eq!(
@@ -185,8 +185,10 @@ fn every_in_window_item_is_in_the_mac_menu_bar_once() {
     for key in b.keys() {
         assert!(a.contains_key(key) || system.contains(&key.0.as_str()), "{key:?} isn't an in-window item");
     }
-    let help = ids(menu(&mac, "Help"));
-    assert!(help.contains(&"help.discord".to_string()) && !help.contains(&"help.about".to_string()), "{help:?}");
+    if let Some(help_menu) = mac.menus.iter().find(|m| m.title == "Help") {
+        let help = ids(&help_menu.children);
+        assert!(!help.contains(&"help.about".to_string()), "{help:?}");
+    }
     let edit = ids(menu(&mac, "Edit"));
     assert!(!edit.contains(&"edit.preferences".to_string()) && edit.contains(&"edit.keyboardShortcuts".to_string()), "{edit:?}");
     assert!(ids(menu(&mac, "Window")).contains(&"[Workspace]".to_string()));

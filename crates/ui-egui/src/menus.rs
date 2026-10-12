@@ -1873,11 +1873,8 @@ pub fn menu_tree() -> Vec<(&'static str, Vec<Item>)> {
     let panel = |label: &'static str, id: &'static str| cp(label, "window.panel", json!({ "panel": id }));
     vec![
         (
-            "VectorCraft",
+            "Preferences",
             vec![
-                c("About VectorCraft", "help.about"),
-                c("Join Our Discord", "help.discord"),
-                Sep,
                 c("Settings…", "edit.preferences"),
                 sub(
                     "Language",
@@ -1888,8 +1885,6 @@ pub fn menu_tree() -> Vec<(&'static str, Vec<Item>)> {
                 ),
                 Sep,
                 sub("UI Brightness", Brightness::ALL.iter().map(|b| cp(b.label(), "window.brightness", json!({"brightness": b.id()}))).collect()),
-                Sep,
-                c("Quit VectorCraft", "app.quit"),
             ],
         ),
         (
@@ -2495,20 +2490,6 @@ pub fn menu_tree() -> Vec<(&'static str, Vec<Item>)> {
                 sub("Graphic Style Libraries", crate::panels::graphic_styles::window_menu()),
                 sub("Swatch Libraries", crate::panels::swatches::window_menu()),
                 sub("Symbol Libraries", library_placeholders()),
-            ],
-        ),
-        (
-            "Help",
-            vec![
-                c("Join Our Discord", "help.discord"),
-                c("ArtCraft Website", "help.website"),
-                c("VectorCraft on getartcraft.com", "help.appPage"),
-                c("VectorCraft on GitHub", "help.github"),
-                Sep,
-                c("Search Commands…", "help.commandPalette"),
-                todos("VectorCraft Help…", "F1"),
-                Sep,
-                c("About VectorCraft", "help.about"),
             ],
         ),
     ]
