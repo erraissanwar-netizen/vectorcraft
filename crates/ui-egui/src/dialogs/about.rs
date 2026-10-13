@@ -42,7 +42,7 @@ fn about_tab(app: &mut VectorcraftApp, ui: &mut egui::Ui) {
     ui.add_space(12.0);
     ui.label(
         egui::RichText::new(tl!(
-            "SVGCode Editor is a free online vector graphics editor that makes creating, editing, and customizing SVG designs simple and accessible. From drawing shapes and editing paths to designing icons, logos, and illustrations, our goal is to provide a powerful SVG editing experience directly in your browser."
+            "SVGCode Editor is an online vector graphics editor that makes creating, editing, and customizing SVG designs simple and accessible. From drawing shapes and editing paths to designing icons, logos, and illustrations, our goal is to provide a powerful SVG editing experience directly in your browser."
         ))
         .size(12.0)
         .color(t.text),

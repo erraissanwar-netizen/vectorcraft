@@ -1025,14 +1025,7 @@ pub fn run_ui_command(app: &mut VectorcraftApp, id: &str, p: &Value) -> Option<R
             Ok(Value::Null)
         }
         "view.toggleScrollLock" => {
-            #[cfg(target_arch = "wasm32")]
-            {
-                if let Some(w) = web_sys::window() {
-                    if let Ok(Some(parent)) = w.parent() {
-                        let _ = parent.post_message(&wasm_bindgen::JsValue::from_str("{\"type\":\"svgcode:toggle_scroll_lock\"}"), "*");
-                    }
-                }
-            }
+            app.open_url("https://svgcode.com/#toggle-scroll");
             Ok(Value::Null)
         }
         "window.control" => flag(&mut app.ui.control_bar),
