@@ -94,6 +94,7 @@ pub const UI_COMMANDS: &[(&str, &str, &str, &str)] = &[
     ("view.goto8", "Saved View 8", "", "{} go to the 8. saved view"),
     ("view.goto9", "Saved View 9", "", "{} go to the 9. saved view"),
     ("view.goto10", "Saved View 10", "", "{} go to the 10. saved view"),
+    ("view.toggleScrollLock", "Unlock Scroll", "", "{} toggle page scroll lock"),
     ("select.recall1", "Saved Selection 1", "", "{} select the 1. saved selection"),
     ("select.recall2", "Saved Selection 2", "", "{} select the 2. saved selection"),
     ("select.recall3", "Saved Selection 3", "", "{} select the 3. saved selection"),
@@ -1020,6 +1021,17 @@ pub fn run_ui_command(app: &mut VectorcraftApp, id: &str, p: &Value) -> Option<R
         "view.rotateReset" => {
             if let Some(v) = app.view_mut() {
                 v.rotation = 0.0;
+            }
+            Ok(Value::Null)
+        }
+        "view.toggleScrollLock" => {
+            #[cfg(target_arch = "wasm32")]
+            {
+                if let Some(w) = web_sys::window() {
+                    if let Ok(Some(parent)) = w.parent() {
+                        let _ = parent.post_message(&wasm_bindgen::JsValue::from_str("{\"type\":\"svgcode:toggle_scroll_lock\"}"), "*");
+                    }
+                }
             }
             Ok(Value::Null)
         }
@@ -2427,6 +2439,8 @@ pub fn menu_tree() -> Vec<(&'static str, Vec<Item>)> {
                 c("Saved View 8", "view.goto8"),
                 c("Saved View 9", "view.goto9"),
                 c("Saved View 10", "view.goto10"),
+                Sep,
+                c("Unlock Scroll", "view.toggleScrollLock"),
             ],
         ),
         (
