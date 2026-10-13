@@ -279,7 +279,7 @@ pub const UI_COMMANDS: &[(&str, &str, &str, &str)] = &[
         "",
         "{} opens the Save PDF dialog; with params = document.exportPdf options written to path (asked when missing; viewAfterSaving opens the file) → {path, bytes, warnings}",
     ),
-    ("help.about", "About SVGCode", "", "{}"),
+    ("help.about", "About SVGCode Editor", "", "{}"),
     ("help.commandPalette", "Search Commands…", "Cmd+Shift+/", "{}"),
     ("app.quit", "Quit VectorCraft", "Cmd+Q", "{}"),
     (
@@ -1940,7 +1940,7 @@ pub fn menu_tree() -> Vec<(&'static str, Vec<Item>)> {
                 Sep,
                 c("Print…", "file.print"),
                 Sep,
-                c("About SVGCode", "help.about"),
+                c("About SVGCode Editor", "help.about"),
             ],
         ),
         (
