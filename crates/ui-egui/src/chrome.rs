@@ -28,16 +28,7 @@ pub fn app_bar(app: &mut VectorcraftApp, ui: &mut Ui) {
             // Brand mark: SVGCode logo.
             let (r, resp) = ui.allocate_exact_size(vec2(64.0, 32.0), Sense::click());
             if resp.clicked() {
-                #[cfg(target_arch = "wasm32")]
-                {
-                    if let Some(win) = web_sys::window() {
-                        if let Some(top) = win.top().ok().flatten() {
-                            let _ = top.location().set_href("/");
-                        } else {
-                            let _ = win.location().set_href("/");
-                        }
-                    }
-                }
+                ui.ctx().open_url(egui::OpenUrl::same_tab("/"));
             }
             crate::brand::paint_mark(ui, r);
             ui.add_space(6.0);
