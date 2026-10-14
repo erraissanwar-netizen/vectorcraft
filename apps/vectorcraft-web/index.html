@@ -74,6 +74,25 @@
   </div>
 
   <script>
+    var originalOpen = window.open;
+    window.open = function(url, target, features) {
+      if (typeof url === 'string') {
+        if (url.indexOf('#report-bug') !== -1) {
+          if (window.parent && window.parent !== window) {
+            window.parent.postMessage({ type: 'svgcode:report_bug' }, '*');
+            return null;
+          }
+        }
+        if (url.indexOf('#toggle-scroll') !== -1) {
+          if (window.parent && window.parent !== window) {
+            window.parent.postMessage({ type: 'svgcode:toggle_scroll_lock' }, '*');
+            return null;
+          }
+        }
+      }
+      return originalOpen ? originalOpen.call(window, url, target, features) : null;
+    };
+
     window.openAboutModal = function() {
       var m = document.getElementById('svgcode_about_modal');
       if (m) m.style.display = 'flex';

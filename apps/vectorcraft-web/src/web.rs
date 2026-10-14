@@ -542,6 +542,15 @@ fn services(inbox: Inbox, place_inbox: PlaceInbox, ctx: egui::Context, locks: Op
         recovery_store: Some(Arc::new(BrowserStore { locks })),
         // File → Print: the browser's print dialog.
         print: Some(Box::new(BrowserPrint)),
+        open_url: Some(Box::new(|url: &str| {
+            if url.contains("#report-bug") {
+                crate::bridge::post_to_parent(&json!({ "type": "svgcode:report_bug" }));
+            } else if url.contains("#toggle-scroll") {
+                crate::bridge::post_to_parent(&json!({ "type": "svgcode:toggle_scroll_lock" }));
+            } else if let Some(window) = web_sys::window() {
+                let _ = window.open_with_url_and_target(url, "_blank");
+            }
+        })),
         ..Default::default()
     }
 }
