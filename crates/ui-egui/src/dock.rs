@@ -81,7 +81,7 @@ pub fn show(app: &mut VectorcraftApp, ui: &mut Ui) {
             .resizable(true)
             .default_size(DOCK_WIDTH)
             .size_range(230.0..=520.0)
-            .frame(egui::Frame::NONE.fill(t.panel).stroke(Stroke::new(1.5, t.border)))
+            .frame(egui::Frame::NONE.fill(t.panel).stroke(Stroke::new(1.0, t.border)))
             .show(ui, |ui| {
                 if collapse_header(ui, false) {
                     toggle(app, true);
@@ -108,7 +108,7 @@ pub fn show(app: &mut VectorcraftApp, ui: &mut Ui) {
     let column = egui::Panel::right("icon_column")
         .resizable(false)
         .exact_size(ICON_COL)
-        .frame(egui::Frame::NONE.fill(t.panel).stroke(Stroke::new(1.5, t.border)))
+        .frame(egui::Frame::NONE.fill(t.panel).stroke(Stroke::new(1.0, t.border)))
         .show(ui, |ui| {
             let bounds = ui.max_rect();
             if collapsed && collapse_header(ui, true) {
@@ -159,7 +159,7 @@ pub fn show(app: &mut VectorcraftApp, ui: &mut Ui) {
 /// the shown panel floats now.
 fn tab_strip(app: &mut VectorcraftApp, ui: &mut Ui, active: DockTab) -> bool {
     let t = Tokens::get(ui.ctx());
-    let (strip, _) = ui.allocate_exact_size(vec2(ui.available_width(), 33.0), Sense::hover());
+    let (strip, _) = ui.allocate_exact_size(vec2(ui.available_width(), 35.0), Sense::hover());
     ui.painter().rect_filled(strip, 0.0, t.tab_strip);
     ui.painter().line_segment([strip.left_bottom(), strip.right_bottom()], Stroke::new(1.0, t.border));
     let out = ui.input(|i| i.pointer.interact_pos()).is_some_and(|p| !strip.contains(p));
@@ -173,29 +173,46 @@ fn tab_strip(app: &mut VectorcraftApp, ui: &mut Ui, active: DockTab) -> bool {
         }
         let is_tab_active = tab == active;
         let galley_measure = ui.painter().layout_no_wrap(tl!(label).to_string(), theme::semibold(12.5), t.text);
-        let r = Rect::from_min_size(egui::pos2(x, strip.top() + 4.0), vec2(galley_measure.size().x + 20.0, strip.height() - 8.0));
+        let r = Rect::from_min_size(egui::pos2(x, strip.top() + 4.5), vec2(galley_measure.size().x + 22.0, strip.height() - 9.0));
         let resp = ui.interact(r, ui.id().with(("docktab", label)), Sense::click_and_drag());
-        if is_tab_active {
-            // Homepage active tab style: vibrant accent #FF5100, subtle aura, white text
-            ui.painter().rect_filled(r.expand(1.0), CornerRadius::same(6), Color32::from_rgba_unmultiplied(255, 81, 0, 35));
-            ui.painter().rect_filled(r, CornerRadius::same(6), t.accent);
-            ui.painter().rect_stroke(r, CornerRadius::same(6), Stroke::new(1.0, t.accent), StrokeKind::Inside);
-        } else {
-            // Homepage inactive tab style: clean bordered pill with muted text, hover wash
-            let bg = if resp.hovered() { t.hover } else { Color32::TRANSPARENT };
-            let border_color = if resp.hovered() { t.input_border } else { t.border };
-            ui.painter().rect_filled(r, CornerRadius::same(6), bg);
-            ui.painter().rect_stroke(r, CornerRadius::same(6), Stroke::new(1.0, border_color), StrokeKind::Inside);
+
+        // Homepage tabs animation: smooth transition (rising from y: 100% to 0% with accent gradient)
+        let anim = ui.ctx().animate_bool_with_time(ui.id().with(("docktab_active_anim", id)), is_tab_active, 0.35);
+
+        // Inactive pill background and border (matching homepage preview tabs: border-gray-200/60 dark:border-white/10)
+        let bg = if resp.hovered() && !is_tab_active { t.hover } else { Color32::TRANSPARENT };
+        let border_color = if resp.hovered() { t.input_border } else { t.border };
+        ui.painter().rect_filled(r, CornerRadius::same(6), bg);
+        ui.painter().rect_stroke(r, CornerRadius::same(6), Stroke::new(1.0, border_color), StrokeKind::Inside);
+
+        // Active rising tab indicator: smoothly rising from bottom edge (y: 100% -> 0%)
+        if anim > 0.005 {
+            let fill_height = r.height() * anim;
+            let rising_rect = Rect::from_min_max(egui::pos2(r.left(), r.bottom() - fill_height), r.right_bottom());
+            let mut clip_painter = ui.painter().with_clip_rect(r);
+            clip_painter.rect_filled(rising_rect, CornerRadius::same(6), t.accent);
+            if anim > 0.85 {
+                ui.painter().rect_filled(r.expand(1.0), CornerRadius::same(7), Color32::from_rgba_unmultiplied(255, 81, 0, (28.0 * anim) as u8));
+                clip_painter.rect_stroke(r, CornerRadius::same(6), Stroke::new(1.0, t.accent), StrokeKind::Inside);
+            }
         }
-        let text_color = if is_tab_active { Color32::WHITE } else if resp.hovered() { t.text } else { t.text_dim };
+
+        // Text color: transitions to white as the accent pill rises up
+        let base_text_color = if resp.hovered() { t.text } else { t.text_dim };
+        let text_color = if anim >= 0.5 {
+            Color32::WHITE
+        } else {
+            base_text_color
+        };
         let galley = ui.painter().layout_no_wrap(tl!(label).to_string(), theme::semibold(12.5), text_color);
-        ui.painter().galley(egui::pos2(r.left() + 10.0, r.center().y - galley.size().y / 2.0), galley, text_color);
+        ui.painter().galley(egui::pos2(r.center().x - galley.size().x / 2.0, r.center().y - galley.size().y / 2.0), galley, text_color);
+
         if resp.clicked() {
             app.ui.dock_tab = tab;
         } else if resp.dragged() && out {
             tear = Some((vec![id], id, r.left()));
         }
-        x = r.right() + 4.0;
+        x = r.right() + 5.0;
     }
     let menu = Rect::from_center_size(strip.right_center() - vec2(14.0, 0.0), vec2(16.0, 16.0));
     let rest = Rect::from_min_max(egui::pos2(x, strip.top()), egui::pos2(menu.left() - 4.0, strip.bottom()));

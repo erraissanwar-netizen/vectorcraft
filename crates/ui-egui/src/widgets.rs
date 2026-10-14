@@ -1338,16 +1338,20 @@ pub fn search_field(ui: &mut Ui, id: egui::Id, hint: &str) -> String {
     egui::Frame::NONE
         .fill(t.input)
         .stroke(Stroke::new(1.0, t.input_border))
-        .corner_radius(egui::CornerRadius::same(6))
+        .corner_radius(egui::CornerRadius::same(8))
         .inner_margin(egui::Margin::symmetric(8, 5))
         .show(ui, |ui| {
-            ui.add(
-                egui::TextEdit::singleline(&mut query)
-                    .id(id.with("edit"))
-                    .frame(egui::Frame::NONE)
-                    .hint_text(egui::RichText::new(tl!(hint)).italics())
-                    .desired_width(ui.available_width()),
-            );
+            ui.horizontal(|ui| {
+                let (icon_rect, _) = ui.allocate_exact_size(vec2(12.0, 12.0), Sense::hover());
+                icons::paint(ui, "search", icon_rect, t.text_dim);
+                ui.add(
+                    egui::TextEdit::singleline(&mut query)
+                        .id(id.with("edit"))
+                        .frame(egui::Frame::NONE)
+                        .hint_text(egui::RichText::new(tl!(hint)))
+                        .desired_width(ui.available_width()),
+                );
+            });
         });
     ui.data_mut(|d| d.insert_temp(id, query.clone()));
     query

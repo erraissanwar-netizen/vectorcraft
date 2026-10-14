@@ -63,26 +63,32 @@ pub fn app_bar(app: &mut VectorcraftApp, ui: &mut Ui) {
             let mut rui = ui.new_child(egui::UiBuilder::new().max_rect(right).layout(egui::Layout::right_to_left(egui::Align::Center)));
             let ui = &mut rui;
             // Workspace switcher: shows the current workspace, opens Window → Workspace.
-            let (wr, wresp) = ui.allocate_exact_size(vec2(ws_w, 24.0), Sense::click());
-            ui.painter().rect_filled(wr, CornerRadius::same(4), if wresp.hovered() { t.hover } else { t.panel });
-            ui.painter().with_clip_rect(wr.shrink2(vec2(4.0, 0.0))).galley(wr.left_center() + vec2(10.0, -ws.size().y / 2.0), ws, t.text);
+            let (wr, wresp) = ui.allocate_exact_size(vec2(ws_w, 26.0), Sense::click());
+            ui.painter().rect_filled(wr, CornerRadius::same(6), if wresp.hovered() { t.hover } else { t.input });
+            ui.painter().rect_stroke(
+                wr,
+                CornerRadius::same(6),
+                Stroke::new(1.0, if wresp.hovered() { t.input_border } else { t.border }),
+                StrokeKind::Inside,
+            );
+            ui.painter().with_clip_rect(wr.shrink2(vec2(6.0, 0.0))).galley(wr.left_center() + vec2(10.0, -ws.size().y / 2.0), ws, t.text);
             icons::paint(ui, "chevron-down", egui::Rect::from_center_size(wr.right_center() - vec2(12.0, 0.0), vec2(12.0, 12.0)), t.text_dim);
             let wresp = wresp.on_hover_text(tl!("Switch workspace"));
             egui::Popup::menu(&wresp).show(|ui| crate::workspaces::popup(app, ui));
             ui.add_space(8.0);
             // Search box → command palette.
             let open_palette = if search_full {
-                let (r, resp) = ui.allocate_exact_size(vec2(200.0, 24.0), Sense::click());
-                ui.painter().rect_filled(r, CornerRadius::same(12), t.input);
+                let (r, resp) = ui.allocate_exact_size(vec2(210.0, 26.0), Sense::click());
+                ui.painter().rect_filled(r, CornerRadius::same(13), t.input);
                 ui.painter().rect_stroke(
                     r,
-                    CornerRadius::same(12),
-                    Stroke::new(1.0, if resp.hovered() { t.input_border } else { t.divider }),
+                    CornerRadius::same(13),
+                    Stroke::new(1.0, if resp.hovered() { t.accent } else { t.input_border }),
                     StrokeKind::Inside,
                 );
-                icons::paint(ui, "search", egui::Rect::from_center_size(r.left_center() + vec2(14.0, 0.0), vec2(13.0, 13.0)), t.text_dim);
+                icons::paint(ui, "search", egui::Rect::from_center_size(r.left_center() + vec2(14.0, 0.0), vec2(13.0, 13.0)), if resp.hovered() { t.accent } else { t.text_dim });
                 ui.painter().text(
-                    r.left_center() + vec2(26.0, 0.0),
+                    r.left_center() + vec2(28.0, 0.0),
                     egui::Align2::LEFT_CENTER,
                     tl!("Search commands and tools"),
                     egui::FontId::proportional(11.5),

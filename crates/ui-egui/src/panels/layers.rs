@@ -27,7 +27,7 @@
 
 use std::collections::HashSet;
 
-use egui::{Color32, Sense, Stroke, StrokeKind, Ui, vec2};
+use egui::{Color32, CornerRadius, Sense, Stroke, StrokeKind, Ui, vec2};
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use vectorcraft_doc::{Document, Node, NodeId, NodeKind};
@@ -352,11 +352,11 @@ pub fn show(app: &mut VectorcraftApp, ui: &mut Ui) {
 /// The bottom bar: the layer count and the panel's buttons.
 fn bottom_bar(app: &mut VectorcraftApp, ui: &mut Ui, view: &View, doc: &Document, actions: &mut Vec<(String, Value)>) {
     let t = &view.t;
-    let (bar, _) = ui.allocate_exact_size(vec2(ui.available_width(), 30.0), Sense::hover());
+    let (bar, _) = ui.allocate_exact_size(vec2(ui.available_width(), 32.0), Sense::hover());
     ui.painter().line_segment([bar.left_top(), bar.right_top()], Stroke::new(1.0, t.divider));
     let n = doc.layers.len();
     ui.painter().text(
-        bar.left_center() + vec2(4.0, 0.0),
+        bar.left_center() + vec2(6.0, 0.0),
         egui::Align2::LEFT_CENTER,
         crate::i18n::tn(n as u64, "{n} Layer", "{n} Layers"),
         egui::FontId::proportional(11.5),
@@ -473,16 +473,18 @@ fn row(ui: &mut Ui, view: &View, n: &Node, depth: usize, clip_path: bool, expand
     let color = layer_colour(doc, n.id);
     // Highlighted rows (else the current layer's).
     let highlighted = if view.rows.is_empty() { n.is_layer() && Some(n.id) == view.current } else { view.rows.contains(&n.id) };
+    let card = r.shrink2(vec2(3.0, 1.0));
     if highlighted {
-        ui.painter().rect_filled(r, 0.0, t.row_selected);
+        // Modern card selection matching SVGCode design: subtle orange tint, border, left accent pill
+        ui.painter().rect_filled(card, CornerRadius::same(6), Color32::from_rgba_unmultiplied(255, 81, 0, 26));
+        ui.painter().rect_stroke(card, CornerRadius::same(6), Stroke::new(1.0, Color32::from_rgba_unmultiplied(255, 81, 0, 95)), StrokeKind::Inside);
+        let pill = egui::Rect::from_min_max(egui::pos2(card.left() + 1.0, card.top() + 3.0), egui::pos2(card.left() + 4.0, card.bottom() - 3.0));
+        ui.painter().rect_filled(pill, CornerRadius::same(2), t.accent);
     } else if resp.hovered() {
-        ui.painter().rect_filled(r, 0.0, t.hover.gamma_multiply(0.6));
-    }
-    ui.painter().line_segment([r.left_bottom(), r.right_bottom()], Stroke::new(1.0, t.input_border));
-    if n.is_layer() && Some(n.id) == view.current {
-        // Current-layer marker: a small triangle in the top-right corner.
-        let c = r.right_top();
-        ui.painter().add(egui::Shape::convex_polygon(vec![c, c + vec2(-6.0, 0.0), c + vec2(0.0, 6.0)], t.text, Stroke::NONE));
+        ui.painter().rect_filled(card, CornerRadius::same(6), t.hover.gamma_multiply(0.75));
+    } else if n.is_layer() && Some(n.id) == view.current {
+        let pill = egui::Rect::from_min_max(egui::pos2(card.left() + 1.0, card.top() + 4.0), egui::pos2(card.left() + 3.0, card.bottom() - 4.0));
+        ui.painter().rect_filled(pill, CornerRadius::same(1), t.accent.gamma_multiply(0.6));
     }
     eye_and_lock(ui, view, n, r, out);
     // Layer colour bar (every row shows the colour of its layer).
@@ -560,8 +562,6 @@ fn row(ui: &mut Ui, view: &View, n: &Node, depth: usize, clip_path: bool, expand
         }
     }
     // Target circle and selection square.
-    let col_x = r.right() - 43.5;
-    ui.painter().line_segment([egui::pos2(col_x, r.top()), egui::pos2(col_x, r.bottom())], Stroke::new(1.0, t.input_border));
     let tc = egui::pos2(r.right() - TARGET_X, r.center().y);
     let tresp = target_circle(ui, n, tc, h, view.target.map_or(is_sel, |id| id == n.id), &mut out.actions, t);
     let sq = egui::pos2(r.right() - SQUARE_X, r.center().y);
@@ -633,10 +633,12 @@ fn eye_and_lock(ui: &mut Ui, view: &View, n: &Node, r: egui::Rect, out: &mut Out
     let h = view.h;
     let eye = egui::Rect::from_min_size(r.min, vec2(COLUMN, h));
     let lock = egui::Rect::from_min_size(r.min + vec2(COLUMN, 0.0), vec2(COLUMN, h));
-    ui.painter().line_segment([eye.right_top(), eye.right_bottom()], Stroke::new(1.0, t.input_border));
-    ui.painter().line_segment([lock.right_top(), lock.right_bottom()], Stroke::new(1.0, t.input_border));
     let preview = !matches!(n.kind, NodeKind::Layer { preview: false, .. });
     let er = ui.interact(eye, ui.id().with(("eye", n.id.0)), Sense::click_and_drag());
+    if er.hovered() {
+        let hr = egui::Rect::from_center_size(eye.center(), vec2(18.0, 18.0));
+        ui.painter().rect_filled(hr, CornerRadius::same(4), t.hover);
+    }
     if n.visible {
         let icon = egui::Rect::from_center_size(eye.center(), vec2(14.0, 14.0));
         if n.is_template() {
@@ -651,6 +653,10 @@ fn eye_and_lock(ui: &mut Ui, view: &View, n: &Node, r: egui::Rect, out: &mut Out
         }
     }
     let lr = ui.interact(lock, ui.id().with(("lock", n.id.0)), Sense::click_and_drag());
+    if lr.hovered() {
+        let hr = egui::Rect::from_center_size(lock.center(), vec2(18.0, 18.0));
+        ui.painter().rect_filled(hr, CornerRadius::same(4), t.hover);
+    }
     if n.locked {
         icons::paint(ui, "lock", egui::Rect::from_center_size(lock.center(), vec2(12.0, 12.0)), t.icon);
     } else if lr.hovered() {

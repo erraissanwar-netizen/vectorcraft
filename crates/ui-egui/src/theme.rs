@@ -187,7 +187,7 @@ impl Tokens {
                 ..base
             },
             Brightness::Light => Tokens {
-                tab_strip: hex(0xf5f3f0),
+                tab_strip: hex(0xfdfdfd),
                 text_strong: hex(0x18181b),
                 button_border: hex(0xe8e5e1),
                 dark: false,
@@ -204,8 +204,8 @@ impl Tokens {
                 icon: hex(0x18181b),
                 hover: hex(0xefece8),
                 tool_active: hex(0xefece8),
-                row_selected: hex(0xefece8),
-                pasteboard: hex(0xe5e2dc),
+                row_selected: hex(0xffede6),
+                pasteboard: hex(0xfdfdfd),
                 ruler: hex(0xf5f3f0),
                 ruler_tick: hex(0x71717a),
                 button: hex(0xf5f3f0),

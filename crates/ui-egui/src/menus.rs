@@ -14,6 +14,7 @@ use crate::io;
 use crate::state::{DockTab, next_zoom};
 use crate::theme::{self, Brightness, Tokens};
 use crate::widgets;
+use egui::{Color32, CornerRadius, Stroke};
 
 #[derive(Clone, Debug)]
 pub enum Item {
@@ -2680,6 +2681,27 @@ pub fn menu_bar(app: &mut VectorcraftApp, ui: &mut egui::Ui) -> f32 {
     let tree = menu_tree();
     let (end, open) = egui::MenuBar::new()
         .ui(ui, |ui| {
+            // Style menu buttons like website header pills
+            ui.spacing_mut().item_spacing.x = 2.0;
+            ui.spacing_mut().button_padding = egui::vec2(9.0, 5.0);
+            let w = &mut ui.visuals_mut().widgets;
+            w.inactive.bg_fill = Color32::TRANSPARENT;
+            w.inactive.weak_bg_fill = Color32::TRANSPARENT;
+            w.inactive.bg_stroke = Stroke::NONE;
+            w.inactive.corner_radius = CornerRadius::same(6);
+            w.hovered.bg_fill = t.hover;
+            w.hovered.weak_bg_fill = t.hover;
+            w.hovered.bg_stroke = Stroke::NONE;
+            w.hovered.corner_radius = CornerRadius::same(6);
+            w.active.bg_fill = Color32::from_rgba_unmultiplied(255, 81, 0, 26);
+            w.active.weak_bg_fill = Color32::from_rgba_unmultiplied(255, 81, 0, 26);
+            w.active.bg_stroke = Stroke::new(1.0, Color32::from_rgba_unmultiplied(255, 81, 0, 95));
+            w.active.corner_radius = CornerRadius::same(6);
+            w.open.bg_fill = Color32::from_rgba_unmultiplied(255, 81, 0, 22);
+            w.open.weak_bg_fill = Color32::from_rgba_unmultiplied(255, 81, 0, 22);
+            w.open.bg_stroke = Stroke::new(1.0, Color32::from_rgba_unmultiplied(255, 81, 0, 80));
+            w.open.corner_radius = CornerRadius::same(6);
+
             let mut titles = Vec::with_capacity(tree.len());
             for (_i, (title, items)) in tree.iter().enumerate() {
                 let text = egui::RichText::new(tl!(title)).font(theme::semibold(12.5)).color(t.text);
@@ -2736,6 +2758,18 @@ fn switch_on_hover(ctx: &egui::Context, titles: &[egui::Response]) -> bool {
 /// A top-level menu's popup: as wide as its widest item (label plus shortcut), at least 230 pt;
 /// it scrolls when it is taller than the window.
 fn menu_body(app: &VectorcraftApp, ui: &mut egui::Ui, items: &[Item], clicked: &mut Option<(String, Value)>) {
+    let t = Tokens::get(ui.ctx());
+    ui.style_mut().spacing.button_padding = egui::vec2(10.0, 5.0);
+    ui.style_mut().spacing.item_spacing.y = 2.0;
+    let w = &mut ui.visuals_mut().widgets;
+    w.inactive.corner_radius = CornerRadius::same(5);
+    w.inactive.bg_fill = Color32::TRANSPARENT;
+    w.inactive.weak_bg_fill = Color32::TRANSPARENT;
+    w.inactive.bg_stroke = Stroke::NONE;
+    w.hovered.corner_radius = CornerRadius::same(5);
+    w.hovered.bg_fill = t.hover;
+    w.hovered.weak_bg_fill = t.hover;
+    w.hovered.bg_stroke = Stroke::NONE;
     widgets::menu_scroll(ui, |ui| {
         ui.set_min_width(230.0);
         render_items(app, ui, items, true, clicked);
