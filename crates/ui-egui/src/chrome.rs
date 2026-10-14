@@ -105,7 +105,7 @@ pub fn app_bar(app: &mut VectorcraftApp, ui: &mut Ui) {
             ui.add_space(6.0);
             // Report Bug button next to Search commands and tools
             let bug_full = room >= with_search + 85.0;
-            let (br, bresp) = if bug_full {
+            let bresp = if bug_full {
                 let (br, bresp) = ui.allocate_exact_size(vec2(100.0, 26.0), Sense::click());
                 let is_hover = bresp.hovered();
                 let bg = if is_hover { Color32::from_rgba_unmultiplied(255, 81, 0, 24) } else { t.input };
@@ -121,7 +121,7 @@ pub fn app_bar(app: &mut VectorcraftApp, ui: &mut Ui) {
                     egui::FontId::proportional(11.5),
                     text_color,
                 );
-                (br, bresp)
+                bresp
             } else {
                 let (br, bresp) = ui.allocate_exact_size(vec2(26.0, 26.0), Sense::click());
                 let is_hover = bresp.hovered();
@@ -130,7 +130,7 @@ pub fn app_bar(app: &mut VectorcraftApp, ui: &mut Ui) {
                 ui.painter().rect_filled(br, CornerRadius::same(13), bg);
                 ui.painter().rect_stroke(br, CornerRadius::same(13), Stroke::new(1.0, border_color), StrokeKind::Inside);
                 paint_bug_icon(ui.painter(), br.center(), Color32::from_rgb(255, 81, 0));
-                (br, bresp)
+                bresp
             };
             if bresp.on_hover_text(tl!("Report Bug or Feedback")).clicked() {
                 app.open_url("https://svgcode.com/#report-bug");
@@ -144,7 +144,7 @@ pub fn app_bar(app: &mut VectorcraftApp, ui: &mut Ui) {
 
 fn paint_bug_icon(painter: &egui::Painter, center: egui::Pos2, color: Color32) {
     let body_rect = egui::Rect::from_center_size(center + vec2(0.0, 1.0), vec2(7.0, 9.0));
-    painter.rect_stroke(body_rect, CornerRadius::same(3.5), Stroke::new(1.2, color), StrokeKind::Inside);
+    painter.rect_stroke(body_rect, CornerRadius::same(3), Stroke::new(1.2, color), StrokeKind::Inside);
     painter.line_segment([center + vec2(0.0, -2.5), center + vec2(0.0, 4.5)], Stroke::new(1.0, color));
     let head_rect = egui::Rect::from_center_size(center + vec2(0.0, -4.5), vec2(5.0, 3.5));
     painter.rect_stroke(head_rect, CornerRadius { nw: 2, ne: 2, sw: 0, se: 0 }, Stroke::new(1.1, color), StrokeKind::Inside);
