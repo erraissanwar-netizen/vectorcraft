@@ -104,7 +104,7 @@ pub fn templates_folder(prefs: &Prefs) -> Option<String> {
     if !prefs.templates_folder.is_empty() {
         return Some(prefs.templates_folder.clone());
     }
-    Some(std::path::Path::new(&home_folder()?).join("Documents").join("VectorCraft Templates").to_string_lossy().to_string())
+    Some(std::path::Path::new(&home_folder()?).join("Documents").join("SVGCode Templates").to_string_lossy().to_string())
 }
 
 /// The user's home folder (`HOME`, else `USERPROFILE` on Windows; none on the web).

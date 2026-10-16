@@ -171,12 +171,12 @@ fn templates_suggest_a_name_in_the_templates_folder_and_open_untitled() {
     s.execute("document.save", &json!({"path": source})).unwrap();
     s.prefs.templates_folder = path(&d, "Templates");
     let r = s.execute("file.saveAsTemplate", &json!({})).unwrap();
-    assert_eq!(r["name"], "flyer template.vctemplate");
+    assert_eq!(r["name"], "flyer template.sctemplate");
     assert_eq!(r["folder"].as_str(), Some(s.prefs.templates_folder.as_str()));
     assert_ne!(r["name"].as_str(), std::path::Path::new(&source).file_name().and_then(|n| n.to_str()), "never the source file");
     // Writing it leaves the document alone; opening it gives an untitled document.
     rect(&mut s);
-    let tpl = path(&d, "flyer template.vctemplate");
+    let tpl = path(&d, "flyer template.sctemplate");
     s.execute("file.saveAsTemplate", &json!({"path": tpl})).unwrap();
     assert_eq!(s.doc().unwrap().path.as_deref(), Some(source.as_str()));
     assert!(s.doc().unwrap().is_dirty());

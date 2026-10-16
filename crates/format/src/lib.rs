@@ -57,15 +57,19 @@ pub const MIN_VERSION: u32 = 1;
 pub const COMPRESSED_SINCE: u32 = 3;
 /// Most pixels on the longer side of an embedded preview.
 pub const PREVIEW_MAX: u32 = 256;
-pub const EXTENSION: &str = "vectorcraft";
-/// Extension and format name from before the project was renamed (DrawCraft): still opened.
-pub const LEGACY_EXTENSION: &str = "drawcraft";
+pub const EXTENSION: &str = "svgcode";
+/// Extension and format name from before the project was renamed (VectorCraft): still opened.
+pub const LEGACY_EXTENSION: &str = "vectorcraft";
+/// Format name from before the project was renamed (DrawCraft): still opened.
+pub const OLD_LEGACY_EXTENSION: &str = "drawcraft";
 /// Most bytes a compressed file may unpack to (a guard against decompression bombs).
 const MAX_UNPACKED: u64 = 512 << 20;
 
 /// Is `ext` (without the dot, any case) a native document extension?
 pub fn is_native_ext(ext: &str) -> bool {
-    ext.eq_ignore_ascii_case(EXTENSION) || ext.eq_ignore_ascii_case(LEGACY_EXTENSION)
+    ext.eq_ignore_ascii_case(EXTENSION)
+        || ext.eq_ignore_ascii_case(LEGACY_EXTENSION)
+        || ext.eq_ignore_ascii_case(OLD_LEGACY_EXTENSION)
 }
 
 /// Does the file name or path end in a native document extension?
@@ -75,7 +79,7 @@ pub fn is_native_name(name: &str) -> bool {
 
 #[derive(Debug, thiserror::Error)]
 pub enum FormatError {
-    #[error("not a VectorCraft file: {0}")]
+    #[error("not an SVGCode file: {0}")]
     NotVectorcraft(String),
     #[error("file version {0} is newer than this VectorCraft supports ({VERSION})")]
     TooNew(u32),
@@ -282,9 +286,9 @@ pub fn save_with(doc: &Document, o: &SaveOptions) -> Result<Vec<u8>, FormatError
     let size = body.len() + images.values().map(|i| i.data.len()).sum::<usize>() + carried + 256;
     let mut w = Envelope { out: Vec::with_capacity(size), pretty };
     // Older apps only know the name from before the rename.
-    w.field("format", &if o.version < 3 { LEGACY_EXTENSION } else { EXTENSION })?;
+    w.field("format", &if o.version < 3 { OLD_LEGACY_EXTENSION } else { EXTENSION })?;
     w.field("version", &o.version)?;
-    w.field("generator", &format!("VectorCraft {}", env!("CARGO_PKG_VERSION")))?;
+    w.field("generator", &format!("SVGCode {}", env!("CARGO_PKG_VERSION")))?;
     if let Some(png) = &o.preview {
         w.field("preview", &blob("image/png", png))?;
     }
@@ -435,7 +439,7 @@ pub fn load_file(bytes: &[u8]) -> Result<NativeFile, FormatError> {
     let text = unpack(bytes)?;
     let (json, tail) = split_tail(&text);
     let f: File = serde_json::from_slice(json).map_err(|e| FormatError::NotVectorcraft(e.to_string()))?;
-    if f.format != EXTENSION && f.format != LEGACY_EXTENSION {
+    if f.format != EXTENSION && f.format != LEGACY_EXTENSION && f.format != OLD_LEGACY_EXTENSION {
         return Err(FormatError::NotVectorcraft(format!("format is `{}`", f.format)));
     }
     if f.version > VERSION {
@@ -461,7 +465,7 @@ pub fn load_file(bytes: &[u8]) -> Result<NativeFile, FormatError> {
     // Untrusted: capped, named and pointing at objects the file has.
     doc.tidy_saved_selections();
     let profiles = f.profiles.into_iter().filter_map(|(name, icc)| Some((name, icc.bytes(tail)?))).collect();
-    Ok(NativeFile { doc, info: FileInfo { version: f.version, legacy: f.format == LEGACY_EXTENSION }, profiles })
+    Ok(NativeFile { doc, info: FileInfo { version: f.version, legacy: f.format != EXTENSION }, profiles })
 }
 
 /// The members of a native file besides its document (which is skipped, not decoded).

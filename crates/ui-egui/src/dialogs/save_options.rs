@@ -332,14 +332,14 @@ mod tests {
         let (mut app, written, picks) = desktop("copy.vectorcraft");
         app.session.prefs.templates_folder = "/templates".into();
         app.run("file.saveCopy", json!({})).unwrap();
-        assert_eq!(picks.borrow()[0].name, "Untitled-1 copy.vectorcraft");
+        assert_eq!(picks.borrow()[0].name, "Untitled-1 copy.svgcode");
         assert!(app.ui.dialog.is_none(), "the native format has no options");
         assert!(vectorcraft_format::sniff(&written.borrow()[0].1));
         assert!(app.session.active().unwrap().path.is_none() && app.session.active().unwrap().is_dirty());
         app.run("file.saveAsTemplate", json!({})).unwrap();
         let pick = &picks.borrow()[1];
-        assert_eq!((pick.name.as_str(), pick.folder.as_deref()), ("Untitled-1 template.vctemplate", Some("/templates")));
-        assert_eq!(pick.filters, [("VectorCraft Template", &["vctemplate"][..])]);
+        assert_eq!((pick.name.as_str(), pick.folder.as_deref()), ("Untitled-1 template.sctemplate", Some("/templates")));
+        assert_eq!(pick.filters, [("SVGCode Template", &["sctemplate", "vctemplate"][..])]);
         assert_eq!(written.borrow()[1].0, "copy.vectorcraft", "the picked name is kept");
     }
 
@@ -348,7 +348,7 @@ mod tests {
         let (mut app, written) = web();
         app.run("file.saveAs", json!({})).unwrap();
         let d = dialog(&app);
-        assert_eq!((heading(d).as_str(), d.str("path").as_str(), d.str("format").as_str()), ("Save As", "Untitled-1.vectorcraft", "vectorcraft"));
+        assert_eq!((heading(d).as_str(), d.str("path").as_str(), d.str("format").as_str()), ("Save As", "Untitled-1.svgcode", "vectorcraft"));
         frame(&mut app, false);
         let mut d = app.ui.dialog.take().unwrap();
         switch_format(&mut app, &mut d, "pdf");

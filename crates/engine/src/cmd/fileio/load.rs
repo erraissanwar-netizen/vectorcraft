@@ -146,7 +146,7 @@ pub fn load_with(name: &str, bytes: &[u8], opts: &LoadOptions) -> Result<Loaded>
         }
         "vectorcraft" | "template" => {
             let (d, info, warnings) = native_file(bytes)?;
-            converted = info.is_old() || super::extension(name) == vectorcraft_format::LEGACY_EXTENSION;
+            converted = info.is_old() || super::extension(name) == vectorcraft_format::LEGACY_EXTENSION || super::extension(name) == vectorcraft_format::OLD_LEGACY_EXTENSION;
             (d, warnings, false)
         }
         "svg" | "svgz" => {

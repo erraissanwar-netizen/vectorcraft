@@ -12,7 +12,7 @@ use crate::state::Dialog;
 use crate::{FilePick, Services, VectorcraftApp, dialogs};
 
 /// Template extensions New from Template's open dialog lists first.
-const TEMPLATE_EXTS: &[&str] = &["vctemplate", "ait", "vectorcraft", "drawcraft"];
+const TEMPLATE_EXTS: &[&str] = &["sctemplate", "vctemplate", "ait", "svgcode", "vectorcraft", "drawcraft"];
 
 /// Open bytes of any readable format as a new document (templates open untitled); swatch and
 /// graphic style library files open in the library panel and flattener, PDF, print and perspective

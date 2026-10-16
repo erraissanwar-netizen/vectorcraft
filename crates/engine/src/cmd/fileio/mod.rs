@@ -439,8 +439,8 @@ const fn reader(id: &'static str, label: &'static str, extensions: &'static [&'s
 pub const FORMATS: &[Format] = &[
     Format {
         id: "vectorcraft",
-        label: "VectorCraft",
-        extensions: &[vectorcraft_format::EXTENSION, vectorcraft_format::LEGACY_EXTENSION],
+        label: "SVGCode Document",
+        extensions: &[vectorcraft_format::EXTENSION, vectorcraft_format::LEGACY_EXTENSION, vectorcraft_format::OLD_LEGACY_EXTENSION],
         mime: "application/json",
         read: true,
         write: true,
@@ -530,8 +530,8 @@ pub const FORMATS: &[Format] = &[
     Format { id: "bmp", label: "BMP", extensions: &["bmp"], mime: "image/bmp", read: true, write: true, raster: true, options: BMP_OPTIONS },
     Format {
         id: "template",
-        label: "VectorCraft Template",
-        extensions: &["vctemplate"],
+        label: "SVGCode Template",
+        extensions: &["sctemplate", "vctemplate"],
         mime: "application/json",
         read: true,
         write: true,
@@ -559,6 +559,7 @@ pub const FORMATS: &[Format] = &[
 
 /// Every extension `document.open` reads (the "All readable files" filter of open dialogs).
 pub const OPEN_EXTS: &[&str] = &[
+    "svgcode",
     "vectorcraft",
     "drawcraft",
     "svg",
@@ -574,6 +575,7 @@ pub const OPEN_EXTS: &[&str] = &[
     "tif",
     "tiff",
     "bmp",
+    "sctemplate",
     "vctemplate",
     "dxf",
     "emf",
@@ -598,6 +600,7 @@ pub const TEXT_EXTS: &[&str] = &["txt"];
 
 /// Every extension File → Place reads: [`OPEN_EXTS`] and [`TEXT_EXTS`].
 pub const PLACE_EXTS: &[&str] = &[
+    "svgcode",
     "vectorcraft",
     "drawcraft",
     "svg",
@@ -613,6 +616,7 @@ pub const PLACE_EXTS: &[&str] = &[
     "tif",
     "tiff",
     "bmp",
+    "sctemplate",
     "vctemplate",
     "dxf",
     "emf",
