@@ -83,6 +83,15 @@
             return null;
           }
         }
+        if (url.indexOf('#contact') !== -1) {
+          if (window.parent && window.parent !== window) {
+            window.parent.postMessage({ type: 'svgcode:contact' }, '*');
+            return null;
+          } else {
+            window.location.href = '/contact';
+            return null;
+          }
+        }
         if (url.indexOf('#toggle-scroll') !== -1) {
           if (window.parent && window.parent !== window) {
             window.parent.postMessage({ type: 'svgcode:toggle_scroll_lock' }, '*');

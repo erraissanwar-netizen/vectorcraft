@@ -102,60 +102,11 @@ pub fn app_bar(app: &mut VectorcraftApp, ui: &mut Ui) {
                 app.ui.palette_open = true;
                 app.ui.palette_query.clear();
             }
-            ui.add_space(6.0);
-            // Report Bug button next to Search commands and tools
-            let bug_full = room >= with_search + 85.0;
-            let bresp = if bug_full {
-                let (br, bresp) = ui.allocate_exact_size(vec2(100.0, 26.0), Sense::click());
-                let is_hover = bresp.hovered();
-                let bg = if is_hover { Color32::from_rgba_unmultiplied(255, 81, 0, 24) } else { t.input };
-                let border_color = if is_hover { t.accent } else { t.border };
-                ui.painter().rect_filled(br, CornerRadius::same(13), bg);
-                ui.painter().rect_stroke(br, CornerRadius::same(13), Stroke::new(1.0, border_color), StrokeKind::Inside);
-                paint_bug_icon(ui.painter(), br.left_center() + vec2(14.0, 0.0), Color32::from_rgb(255, 81, 0));
-                let text_color = if is_hover { t.accent } else { t.text };
-                ui.painter().text(
-                    br.left_center() + vec2(26.0, 0.0),
-                    egui::Align2::LEFT_CENTER,
-                    tl!("Report Bug"),
-                    egui::FontId::proportional(11.5),
-                    text_color,
-                );
-                bresp
-            } else {
-                let (br, bresp) = ui.allocate_exact_size(vec2(26.0, 26.0), Sense::click());
-                let is_hover = bresp.hovered();
-                let bg = if is_hover { Color32::from_rgba_unmultiplied(255, 81, 0, 24) } else { t.input };
-                let border_color = if is_hover { t.accent } else { t.border };
-                ui.painter().rect_filled(br, CornerRadius::same(13), bg);
-                ui.painter().rect_stroke(br, CornerRadius::same(13), Stroke::new(1.0, border_color), StrokeKind::Inside);
-                paint_bug_icon(ui.painter(), br.center(), Color32::from_rgb(255, 81, 0));
-                bresp
-            };
-            if bresp.on_hover_text(tl!("Report Bug or Feedback")).clicked() {
-                app.open_url("https://svgcode.com/#report-bug");
-            }
         });
     });
     if custom {
         titlebar::caption_buttons(app, ui, bar.response.rect);
     }
-}
-
-fn paint_bug_icon(painter: &egui::Painter, center: egui::Pos2, color: Color32) {
-    let body_rect = egui::Rect::from_center_size(center + vec2(0.0, 1.0), vec2(7.0, 9.0));
-    painter.rect_stroke(body_rect, CornerRadius::same(3), Stroke::new(1.2, color), StrokeKind::Inside);
-    painter.line_segment([center + vec2(0.0, -2.5), center + vec2(0.0, 4.5)], Stroke::new(1.0, color));
-    let head_rect = egui::Rect::from_center_size(center + vec2(0.0, -4.5), vec2(5.0, 3.5));
-    painter.rect_stroke(head_rect, CornerRadius { nw: 2, ne: 2, sw: 0, se: 0 }, Stroke::new(1.1, color), StrokeKind::Inside);
-    painter.line_segment([center + vec2(-1.5, -5.5), center + vec2(-3.5, -7.5)], Stroke::new(1.0, color));
-    painter.line_segment([center + vec2(1.5, -5.5), center + vec2(3.5, -7.5)], Stroke::new(1.0, color));
-    painter.line_segment([center + vec2(-3.5, -1.0), center + vec2(-6.0, -2.5)], Stroke::new(1.1, color));
-    painter.line_segment([center + vec2(3.5, -1.0), center + vec2(6.0, -2.5)], Stroke::new(1.1, color));
-    painter.line_segment([center + vec2(-3.5, 1.5), center + vec2(-6.5, 1.5)], Stroke::new(1.1, color));
-    painter.line_segment([center + vec2(3.5, 1.5), center + vec2(6.5, 1.5)], Stroke::new(1.1, color));
-    painter.line_segment([center + vec2(-3.5, 4.0), center + vec2(-6.0, 5.5)], Stroke::new(1.1, color));
-    painter.line_segment([center + vec2(3.5, 4.0), center + vec2(6.0, 5.5)], Stroke::new(1.1, color));
 }
 
 /// An anchor button: icon, tooltip, command and the convert command's `to`.

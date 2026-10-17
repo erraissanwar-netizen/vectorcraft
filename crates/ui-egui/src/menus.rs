@@ -281,6 +281,8 @@ pub const UI_COMMANDS: &[(&str, &str, &str, &str)] = &[
         "",
         "{} opens the Save PDF dialog; with params = document.exportPdf options written to path (asked when missing; viewAfterSaving opens the file) → {path, bytes, warnings}",
     ),
+    ("help.contact", "Contact Us", "", "{}"),
+    ("help.reportBug", "Report Bug", "", "{}"),
     ("help.about", "About SVGCode Editor", "", "{}"),
     ("help.commandPalette", "Search Commands…", "Cmd+Shift+/", "{}"),
     ("app.quit", "Quit VectorCraft", "Cmd+Q", "{}"),
@@ -1145,6 +1147,14 @@ pub fn run_ui_command(app: &mut VectorcraftApp, id: &str, p: &Value) -> Option<R
         },
         "file.export.pdf" if p.as_object().is_none_or(|o| o.is_empty()) => crate::dialogs::open_save_pdf(app, &json!({})),
         "file.export.pdf" => io::export_pdf(app, p.clone()),
+        "help.contact" => {
+            app.open_url("https://svgcode.com/#contact");
+            Ok(Value::Null)
+        }
+        "help.reportBug" => {
+            app.open_url("https://svgcode.com/#report-bug");
+            Ok(Value::Null)
+        }
         "help.about" => {
             app.ui.about = true;
             Ok(Value::Null)
@@ -1945,8 +1955,6 @@ pub fn menu_tree() -> Vec<(&'static str, Vec<Item>)> {
                 c("File Info…", "file.info"),
                 Sep,
                 c("Print…", "file.print"),
-                Sep,
-                c("About SVGCode Editor", "help.about"),
             ],
         ),
         (
@@ -2502,6 +2510,15 @@ pub fn menu_tree() -> Vec<(&'static str, Vec<Item>)> {
                 sub("Symbol Libraries", library_placeholders()),
             ],
         ),
+        (
+            "Help",
+            vec![
+                c("Contact Us", "help.contact"),
+                c("Report Bug", "help.reportBug"),
+                Sep,
+                c("About SVGCode Editor", "help.about"),
+            ],
+        ),
     ]
 }
 
@@ -3055,6 +3072,14 @@ pub fn invoke(app: &mut VectorcraftApp, id: &str, p: Value) {
     }
     if id == "view.toggleScrollLock" {
         app.open_url("https://svgcode.com/#toggle-scroll");
+        return;
+    }
+    if id == "help.contact" {
+        app.open_url("https://svgcode.com/#contact");
+        return;
+    }
+    if id == "help.reportBug" {
+        app.open_url("https://svgcode.com/#report-bug");
         return;
     }
     // Help links: the command returns the URL; a menu click opens it (agents just get the URL).
