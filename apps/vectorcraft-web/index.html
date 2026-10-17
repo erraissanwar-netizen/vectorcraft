@@ -83,12 +83,12 @@
             return null;
           }
         }
-        if (url.indexOf('#contact') !== -1) {
+        if (url.indexOf('contact') !== -1) {
           if (window.parent && window.parent !== window) {
-            window.parent.postMessage({ type: 'svgcode:contact' }, '*');
+            window.parent.postMessage({ type: 'svgcode:contact', url: 'https://svgcode.com/contact' }, '*');
             return null;
           } else {
-            window.location.href = '/contact';
+            window.open('https://svgcode.com/contact', '_blank', 'noopener,noreferrer');
             return null;
           }
         }
