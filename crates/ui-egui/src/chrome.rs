@@ -328,17 +328,28 @@ pub fn doc_tabs(app: &mut VectorcraftApp, ui: &mut Ui) {
     let (strip, _) = ui.allocate_exact_size(vec2(ui.available_width(), 35.0), Sense::hover());
     ui.painter().rect_filled(strip, 0.0, t.tab_strip);
     ui.painter().line_segment([strip.left_bottom(), strip.right_bottom()], Stroke::new(1.0, t.border));
+    let reserved_right = 215.0; // Reserve space for "Edit in Code Editor" button at extreme right
+    let tab_area_right = (strip.right() - reserved_right).max(strip.left() + 80.0);
     let mut x = strip.left() + 8.0;
     let mut activate = None;
     let mut close = None;
     let active = app.session.active_index();
+    let num_docs = app.session.documents().len();
     for (i, d) in app.session.documents().iter().enumerate() {
+        if x + 30.0 >= tab_area_right {
+            break;
+        }
         let zoom = app.views.get(i).map(|v| v.zoom).unwrap_or(1.0);
         let title = tab_title(d, zoom, app.ui.view.outline);
         // On the Home screen no tab is the current one.
         let is_active = Some(i) == active && app.ui.home.is_none();
         let galley_measure = ui.painter().layout_no_wrap(title.clone(), theme::semibold(12.5), t.text);
-        let w = galley_measure.size().x + 46.0;
+        let natural_w = galley_measure.size().x + 46.0;
+        let max_w_per_tab = ((tab_area_right - strip.left() - 8.0) / (num_docs.max(1) as f32) - 6.0).max(50.0);
+        let w = natural_w.min(max_w_per_tab).min(tab_area_right - x);
+        if w < 24.0 {
+            break;
+        }
         let r = egui::Rect::from_min_size(egui::pos2(x, strip.top() + 4.0), vec2(w, strip.height() - 8.0));
         let resp = ui.interact(r, ui.id().with(("tab", i)), Sense::click());
         if is_active {
@@ -364,7 +375,8 @@ pub fn doc_tabs(app: &mut VectorcraftApp, ui: &mut Ui) {
         icons::paint(ui, "x", xr, x_color);
         let text_color = if is_active { Color32::WHITE } else if resp.hovered() { t.text } else { t.text_dim };
         let galley = ui.painter().layout_no_wrap(title, theme::semibold(12.5), text_color);
-        ui.painter().galley(egui::pos2(r.left() + 28.0, r.center().y - galley.size().y / 2.0), galley, text_color);
+        let mut clip_painter = ui.painter().with_clip_rect(r.shrink2(vec2(4.0, 0.0)));
+        clip_painter.galley(egui::pos2(r.left() + 28.0, r.center().y - galley.size().y / 2.0), galley, text_color);
         if xresp.clicked() {
             close = Some(i);
         } else if resp.clicked() {
