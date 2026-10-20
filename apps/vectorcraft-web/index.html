@@ -186,6 +186,87 @@
         }
       } catch (err) {}
     }, true);
+
+    window.addEventListener('message', function(e) {
+      if (e.data && e.data.type === 'svgcode:show_about') {
+        window.openAboutModal();
+      }
+    });
+
+    // Tool Selection tracking bridge
+    var TOOL_SHORTCUTS = {
+      v: 'selection',
+      a: 'direct_selection',
+      p: 'pen',
+      t: 'type',
+      m: 'rectangle',
+      l: 'ellipse',
+      b: 'brush',
+      n: 'pencil',
+      e: 'eraser',
+      r: 'rotate',
+      s: 'scale',
+      i: 'eyedropper',
+      g: 'gradient',
+      h: 'hand',
+      z: 'zoom',
+      c: 'scissors',
+      u: 'shape_builder'
+    };
+
+    var TOOL_SLOTS = [
+      'selection',
+      'direct_selection',
+      'rectangle',
+      'ellipse',
+      'polygon',
+      'pencil',
+      'eraser',
+      'brush',
+      'pen',
+      'curvature',
+      'type',
+      'rotate',
+      'scale',
+      'eyedropper',
+      'gradient',
+      'hand',
+      'zoom'
+    ];
+
+    function notifyToolSelect(toolName, method) {
+      if (window.parent && window.parent !== window) {
+        window.parent.postMessage({
+          type: 'svgcode:select_tool',
+          tool: toolName,
+          method: method || 'shortcut'
+        }, '*');
+      }
+    }
+
+    // Detect keyboard shortcuts for tool selection
+    window.addEventListener('keydown', function(e) {
+      if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable)) {
+        return;
+      }
+      if (e.ctrlKey || e.metaKey || e.altKey) {
+        return;
+      }
+      var key = (e.key || '').toLowerCase();
+      if (TOOL_SHORTCUTS[key]) {
+        notifyToolSelect(TOOL_SHORTCUTS[key], 'shortcut');
+      }
+    }, true);
+
+    // Detect clicks on the left toolbar
+    window.addEventListener('click', function(e) {
+      if (e.clientX <= 48 && e.clientY >= 36) {
+        var slotIndex = Math.floor((e.clientY - 36) / 30);
+        if (slotIndex >= 0 && slotIndex < TOOL_SLOTS.length) {
+          notifyToolSelect(TOOL_SLOTS[slotIndex], 'toolbar');
+        }
+      }
+    }, true);
   </script>
 </body>
 </html>
