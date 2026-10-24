@@ -189,7 +189,7 @@ impl Tokens {
             Brightness::Light => Tokens {
                 tab_strip: hex(0xfdfdfd),
                 text_strong: hex(0x18181b),
-                button_border: hex(0xe8e5e1),
+                button_border: hex(0xe2e8f0),
                 dark: false,
                 app_bar: hex(0xffffff),
                 panel: hex(0xfaf8f6),
