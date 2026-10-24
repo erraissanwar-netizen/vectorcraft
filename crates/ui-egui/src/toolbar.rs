@@ -4,7 +4,7 @@
 //! tools out in one or two columns.
 //! Bottom: fill/stroke proxy, colour/gradient/none, drawing modes, screen mode, Edit Toolbar.
 
-use egui::{Color32, CornerRadius, Sense, Stroke, StrokeKind, Ui, pos2, vec2};
+use egui::{Color32, CornerRadius, Rect, Sense, Stroke, StrokeKind, Ui, pos2, vec2};
 use serde_json::json;
 use vectorcraft_color::Paint;
 use vectorcraft_tools::{TOOL_GROUPS, ToolInfo, tool_info};
@@ -199,21 +199,36 @@ fn body(app: &mut VectorcraftApp, ui: &mut Ui, cols: usize, floating: Option<egu
                     let Some(shown) = tool_info(&shown_id).or_else(|| tool_info(slot[0])) else { continue };
                     let is_active = slot.contains(&active);
                     let (rect, resp) = ui.allocate_exact_size(vec2(36.0, PITCH - 1.0), Sense::click_and_drag());
-                    let well = egui::Rect::from_center_size(rect.center(), vec2(33.0, 28.0));
-                    if is_active {
-                        // Glowing color and effect matching homepage sidebar (#FF5100 glow aura + ring)
-                        ui.painter().rect_filled(well.expand(1.5), CornerRadius::same(7), Color32::from_rgba_unmultiplied(255, 81, 0, 32));
-                        ui.painter().rect_filled(well, CornerRadius::same(6), Color32::from_rgba_unmultiplied(255, 81, 0, 48));
-                        ui.painter().rect_stroke(well, CornerRadius::same(6), Stroke::new(1.0, Color32::from_rgba_unmultiplied(255, 81, 0, 180)), egui::StrokeKind::Inside);
-                    } else if resp.hovered() {
-                        ui.painter().rect_filled(well, CornerRadius::same(6), t.hover);
+                    let well = Rect::from_center_size(rect.center(), vec2(33.0, 28.0));
+
+                    // Smooth rising transition matching properties/layers/libraries tabs (rising y: 100% -> 0% with accent fill)
+                    let anim = ui.ctx().animate_bool_with_time(ui.id().with(("tool_slot_active_anim", slot[0])), is_active, 0.35);
+
+                    let bg = if resp.hovered() && !is_active { t.hover } else { Color32::TRANSPARENT };
+                    let border_color = if resp.hovered() && !is_active { t.input_border } else { Color32::TRANSPARENT };
+                    ui.painter().rect_filled(well, CornerRadius::same(6), bg);
+                    if !border_color.is_transparent() {
+                        ui.painter().rect_stroke(well, CornerRadius::same(6), Stroke::new(1.0, border_color), StrokeKind::Inside);
                     }
-                    let ir = egui::Rect::from_center_size(rect.center(), vec2(18.0, 18.0));
-                    let icon_color = if is_active { t.accent } else if resp.hovered() { t.text_strong } else { t.icon };
+
+                    if anim > 0.005 {
+                        let fill_height = well.height() * anim;
+                        let rising_rect = Rect::from_min_max(pos2(well.left(), well.bottom() - fill_height), well.right_bottom());
+                        let mut clip_painter = ui.painter().with_clip_rect(well);
+                        clip_painter.rect_filled(rising_rect, CornerRadius::same(6), t.accent);
+                        if anim > 0.85 {
+                            ui.painter().rect_filled(well.expand(1.0), CornerRadius::same(7), Color32::from_rgba_unmultiplied(255, 81, 0, (28.0 * anim) as u8));
+                            clip_painter.rect_stroke(well, CornerRadius::same(6), Stroke::new(1.0, t.accent), StrokeKind::Inside);
+                        }
+                    }
+
+                    let ir = Rect::from_center_size(rect.center(), vec2(18.0, 18.0));
+                    let base_icon_color = if resp.hovered() { t.text_strong } else { t.icon };
+                    let icon_color = if anim >= 0.5 { Color32::WHITE } else { base_icon_color };
                     icons::paint(ui, icons::tool_icon(shown.icon), ir, icon_color);
                     if slot.len() > 1 {
                         let c = rect.center() + vec2(12.5, 10.0);
-                        let arrow_color = if is_active { t.accent } else { t.icon };
+                        let arrow_color = if anim >= 0.5 { Color32::WHITE } else { base_icon_color };
                         ui.painter().add(egui::Shape::convex_polygon(vec![c, c + vec2(-3.5, 0.0), c + vec2(0.0, -3.5)], arrow_color, Stroke::NONE));
                     }
                     let press = if slot.len() > 1 { flyout_press(ui, &resp, rect) } else { None };
@@ -567,16 +582,31 @@ fn tool_strip(ui: &mut Ui, t: &Tokens, active: &str, tools: &[String]) -> Option
         let (r, resp) = ui.allocate_exact_size(STRIP_BUTTON, Sense::click());
         let well = r.shrink(1.0);
         let is_active = active == tool.id;
-        if is_active {
-            // Glowing color and effect matching homepage sidebar
-            ui.painter().rect_filled(well.expand(1.5), CornerRadius::same(7), Color32::from_rgba_unmultiplied(255, 81, 0, 32));
-            ui.painter().rect_filled(well, CornerRadius::same(6), Color32::from_rgba_unmultiplied(255, 81, 0, 48));
-            ui.painter().rect_stroke(well, CornerRadius::same(6), Stroke::new(1.0, Color32::from_rgba_unmultiplied(255, 81, 0, 180)), egui::StrokeKind::Inside);
-        } else if resp.hovered() {
-            ui.painter().rect_filled(well, CornerRadius::same(6), t.hover);
+
+        // Smooth rising transition matching properties/layers/libraries tabs (rising y: 100% -> 0% with accent fill)
+        let anim = ui.ctx().animate_bool_with_time(ui.id().with(("tool_strip_active_anim", tool.id)), is_active, 0.35);
+
+        let bg = if resp.hovered() && !is_active { t.hover } else { Color32::TRANSPARENT };
+        let border_color = if resp.hovered() && !is_active { t.input_border } else { Color32::TRANSPARENT };
+        ui.painter().rect_filled(well, CornerRadius::same(6), bg);
+        if !border_color.is_transparent() {
+            ui.painter().rect_stroke(well, CornerRadius::same(6), Stroke::new(1.0, border_color), StrokeKind::Inside);
         }
-        let ir = egui::Rect::from_center_size(r.center(), vec2(18.0, 18.0));
-        let icon_color = if is_active { t.accent } else if resp.hovered() { t.text_strong } else { t.icon };
+
+        if anim > 0.005 {
+            let fill_height = well.height() * anim;
+            let rising_rect = Rect::from_min_max(pos2(well.left(), well.bottom() - fill_height), well.right_bottom());
+            let mut clip_painter = ui.painter().with_clip_rect(well);
+            clip_painter.rect_filled(rising_rect, CornerRadius::same(6), t.accent);
+            if anim > 0.85 {
+                ui.painter().rect_filled(well.expand(1.0), CornerRadius::same(7), Color32::from_rgba_unmultiplied(255, 81, 0, (28.0 * anim) as u8));
+                clip_painter.rect_stroke(well, CornerRadius::same(6), Stroke::new(1.0, t.accent), StrokeKind::Inside);
+            }
+        }
+
+        let ir = Rect::from_center_size(r.center(), vec2(18.0, 18.0));
+        let base_icon_color = if resp.hovered() { t.text_strong } else { t.icon };
+        let icon_color = if anim >= 0.5 { Color32::WHITE } else { base_icon_color };
         icons::paint(ui, icons::tool_icon(tool.icon), ir, icon_color);
         if resp.on_hover_text(tip(tool)).clicked() {
             chosen = Some(tool.id);

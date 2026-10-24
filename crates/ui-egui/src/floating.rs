@@ -13,7 +13,7 @@
 //! panel's position are kept with the preferences and in user workspaces, and a position saved on
 //! a bigger window is clamped into this one when drawn.
 
-use egui::{CornerRadius, Id, Pos2, Rect, Sense, Stroke, Vec2, pos2, vec2};
+use egui::{Color32, CornerRadius, Id, Pos2, Rect, Sense, Stroke, StrokeKind, Vec2, pos2, vec2};
 use serde_json::{Value, json};
 
 use crate::state::{DockTab, FloatingPanels, UiState, all_panels};
@@ -343,10 +343,25 @@ pub fn show(app: &mut VectorcraftApp, ctx: &egui::Context) {
                     let r = Rect::from_min_size(pos2(left, strip.top()), vec2(galley.size().x + 24.0, STRIP));
                     left = r.right();
                     let resp = ui.interact(r, ui.id().with(("tab", id)), Sense::click_and_drag());
-                    if id == active {
-                        ui.painter().rect_filled(r, 0.0, t.panel);
+                    let is_tab_active = id == active;
+                    let anim = ui.ctx().animate_bool_with_time(ui.id().with(("floating_tab_anim", id)), is_tab_active, 0.35);
+                    let bg = if resp.hovered() && !is_tab_active { t.hover } else { Color32::TRANSPARENT };
+                    let border_color = if resp.hovered() { t.input_border } else { t.border };
+                    ui.painter().rect_filled(r, CornerRadius::same(6), bg);
+                    ui.painter().rect_stroke(r, CornerRadius::same(6), Stroke::new(1.0, border_color), StrokeKind::Inside);
+                    if anim > 0.005 {
+                        let fill_height = r.height() * anim;
+                        let rising_rect = Rect::from_min_max(pos2(r.left(), r.bottom() - fill_height), r.right_bottom());
+                        let mut clip_painter = ui.painter().with_clip_rect(r);
+                        clip_painter.rect_filled(rising_rect, CornerRadius::same(6), t.accent);
+                        if anim > 0.85 {
+                            ui.painter().rect_filled(r.expand(1.0), CornerRadius::same(7), Color32::from_rgba_unmultiplied(255, 81, 0, (28.0 * anim) as u8));
+                            clip_painter.rect_stroke(r, CornerRadius::same(6), Stroke::new(1.0, t.accent), StrokeKind::Inside);
+                        }
                     }
-                    ui.painter().galley(pos2(r.left() + 12.0, r.center().y - galley.size().y / 2.0), galley, t.text);
+                    let base_text_color = if resp.hovered() { t.text } else { t.text_dim };
+                    let text_color = if anim >= 0.5 { Color32::WHITE } else { base_text_color };
+                    ui.painter().galley(pos2(r.left() + 12.0, r.center().y - galley.size().y / 2.0), galley, text_color);
                     if resp.clicked() {
                         action = Some(Action::Activate(gi, k));
                     } else if lone && resp.drag_started() {

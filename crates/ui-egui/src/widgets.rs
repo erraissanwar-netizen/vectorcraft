@@ -18,16 +18,31 @@ pub fn paint_icon_button(ui: &mut Ui, resp: Response, icon: &str, tip: &str, sel
     let t = Tokens::get(ui.ctx());
     let rect = resp.rect;
     let size = rect.width();
-    if selected {
-        ui.painter().rect_filled(rect.expand(1.5), CornerRadius::same(6), Color32::from_rgba_unmultiplied(255, 81, 0, 32));
-        ui.painter().rect_filled(rect, CornerRadius::same(5), Color32::from_rgba_unmultiplied(255, 81, 0, 48));
-        ui.painter().rect_stroke(rect, CornerRadius::same(5), Stroke::new(1.0, Color32::from_rgba_unmultiplied(255, 81, 0, 180)), StrokeKind::Inside);
-    } else {
-        let bg = if resp.hovered() { t.hover } else { Color32::TRANSPARENT };
-        ui.painter().rect_filled(rect, CornerRadius::same(5), bg);
+
+    // Smooth rising transition matching properties/layers/libraries tabs (rising y: 100% -> 0% with accent fill)
+    let anim = ui.ctx().animate_bool_with_time(resp.id.with("icon_button_active_anim"), selected, 0.35);
+
+    let bg = if resp.hovered() && !selected { t.hover } else { Color32::TRANSPARENT };
+    let border_color = if resp.hovered() && !selected { t.input_border } else { Color32::TRANSPARENT };
+    ui.painter().rect_filled(rect, CornerRadius::same(6), bg);
+    if !border_color.is_transparent() {
+        ui.painter().rect_stroke(rect, CornerRadius::same(6), Stroke::new(1.0, border_color), StrokeKind::Inside);
     }
+
+    if anim > 0.005 {
+        let fill_height = rect.height() * anim;
+        let rising_rect = Rect::from_min_max(pos2(rect.left(), rect.bottom() - fill_height), rect.right_bottom());
+        let mut clip_painter = ui.painter().with_clip_rect(rect);
+        clip_painter.rect_filled(rising_rect, CornerRadius::same(6), t.accent);
+        if anim > 0.85 {
+            ui.painter().rect_filled(rect.expand(1.0), CornerRadius::same(7), Color32::from_rgba_unmultiplied(255, 81, 0, (28.0 * anim) as u8));
+            clip_painter.rect_stroke(rect, CornerRadius::same(6), Stroke::new(1.0, t.accent), StrokeKind::Inside);
+        }
+    }
+
     let pad = (size * 0.2).round();
-    let icon_color = if selected { t.accent } else if resp.hovered() { t.text } else { t.icon };
+    let base_icon_color = if resp.hovered() { t.text } else { t.icon };
+    let icon_color = if anim >= 0.5 { Color32::WHITE } else { base_icon_color };
     icons::paint(ui, icon, rect.shrink(pad), icon_color);
     if !tip.is_empty() { resp.on_hover_text(tl!(tip)) } else { resp }
 }
