@@ -2,7 +2,7 @@
 
 use std::borrow::Cow;
 
-use egui::{Color32, CornerRadius, Sense, Stroke, StrokeKind, Ui, vec2};
+use egui::{Color32, CornerRadius, Rect, Sense, Stroke, StrokeKind, Ui, vec2};
 use serde_json::json;
 use vectorcraft_doc::NodeKind;
 
@@ -19,8 +19,11 @@ pub fn app_bar(app: &mut VectorcraftApp, ui: &mut Ui) {
     let t = Tokens::get(ui.ctx());
     let custom = app.custom_titlebar;
     let left = if app.integrated_titlebar { 78 } else { 8 };
-    let frame = egui::Frame::NONE.fill(t.app_bar).inner_margin(egui::Margin { left, right: if custom { 0 } else { 14 }, top: 0, bottom: 0 });
-    let bar = egui::Panel::top("app_bar").exact_size(44.0).frame(frame.stroke(Stroke::new(1.0, t.border))).show(ui, |ui| {
+    let frame = egui::Frame::NONE
+        .fill(t.app_bar)
+        .corner_radius(CornerRadius { nw: 0, ne: 0, sw: 8, se: 8 })
+        .inner_margin(egui::Margin { left, right: if custom { 0 } else { 14 }, top: 0, bottom: 0 });
+    let bar = egui::Panel::top("app_bar").exact_size(44.0).frame(frame).show(ui, |ui| {
         if custom {
             titlebar::drag_area(ui, ui.max_rect());
         }
@@ -104,6 +107,41 @@ pub fn app_bar(app: &mut VectorcraftApp, ui: &mut Ui) {
             }
         });
     });
+    // Menubar styling: border-b border-slate-200 and subtle shadow-sm
+    let bar_rect = bar.response.rect;
+    let painter = ui.painter();
+    painter.line_segment(
+        [egui::pos2(bar_rect.left(), bar_rect.bottom()), egui::pos2(bar_rect.right(), bar_rect.bottom())],
+        Stroke::new(1.0, t.border),
+    );
+    if t.dark {
+        painter.rect_filled(
+            Rect::from_min_max(egui::pos2(bar_rect.left(), bar_rect.bottom()), egui::pos2(bar_rect.right(), bar_rect.bottom() + 1.0)),
+            CornerRadius::ZERO,
+            Color32::from_rgba_unmultiplied(0, 0, 0, 50),
+        );
+        painter.rect_filled(
+            Rect::from_min_max(egui::pos2(bar_rect.left(), bar_rect.bottom() + 1.0), egui::pos2(bar_rect.right(), bar_rect.bottom() + 2.5)),
+            CornerRadius::ZERO,
+            Color32::from_rgba_unmultiplied(0, 0, 0, 25),
+        );
+    } else {
+        painter.rect_filled(
+            Rect::from_min_max(egui::pos2(bar_rect.left(), bar_rect.bottom()), egui::pos2(bar_rect.right(), bar_rect.bottom() + 1.0)),
+            CornerRadius::ZERO,
+            Color32::from_rgba_unmultiplied(15, 23, 42, 18),
+        );
+        painter.rect_filled(
+            Rect::from_min_max(egui::pos2(bar_rect.left(), bar_rect.bottom() + 1.0), egui::pos2(bar_rect.right(), bar_rect.bottom() + 2.5)),
+            CornerRadius::ZERO,
+            Color32::from_rgba_unmultiplied(15, 23, 42, 10),
+        );
+        painter.rect_filled(
+            Rect::from_min_max(egui::pos2(bar_rect.left(), bar_rect.bottom() + 2.5), egui::pos2(bar_rect.right(), bar_rect.bottom() + 4.0)),
+            CornerRadius::ZERO,
+            Color32::from_rgba_unmultiplied(15, 23, 42, 4),
+        );
+    }
     if custom {
         titlebar::caption_buttons(app, ui, bar.response.rect);
     }

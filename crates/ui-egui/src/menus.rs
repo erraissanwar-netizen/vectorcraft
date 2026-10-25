@@ -13,8 +13,9 @@ use crate::VectorcraftApp;
 use crate::io;
 use crate::state::{DockTab, next_zoom};
 use crate::theme::{self, Brightness, Tokens};
+use crate::icons;
 use crate::widgets;
-use egui::{Color32, CornerRadius, Stroke};
+use egui::{Color32, CornerRadius, Rect, Stroke, StrokeKind, pos2, vec2};
 
 #[derive(Clone, Debug)]
 pub enum Item {
@@ -2698,31 +2699,51 @@ pub fn menu_bar(app: &mut VectorcraftApp, ui: &mut egui::Ui) -> f32 {
     let tree = menu_tree();
     let (end, open) = egui::MenuBar::new()
         .ui(ui, |ui| {
-            // Style menu buttons like website header pills
-            ui.spacing_mut().item_spacing.x = 2.0;
-            ui.spacing_mut().button_padding = egui::vec2(9.0, 5.0);
-            let w = &mut ui.visuals_mut().widgets;
-            w.inactive.bg_fill = Color32::TRANSPARENT;
-            w.inactive.weak_bg_fill = Color32::TRANSPARENT;
-            w.inactive.bg_stroke = Stroke::NONE;
-            w.inactive.corner_radius = CornerRadius::same(6);
-            w.hovered.bg_fill = t.hover;
-            w.hovered.weak_bg_fill = t.hover;
-            w.hovered.bg_stroke = Stroke::NONE;
-            w.hovered.corner_radius = CornerRadius::same(6);
-            w.active.bg_fill = Color32::from_rgba_unmultiplied(255, 81, 0, 26);
-            w.active.weak_bg_fill = Color32::from_rgba_unmultiplied(255, 81, 0, 26);
-            w.active.bg_stroke = Stroke::new(1.0, Color32::from_rgba_unmultiplied(255, 81, 0, 95));
-            w.active.corner_radius = CornerRadius::same(6);
-            w.open.bg_fill = Color32::from_rgba_unmultiplied(255, 81, 0, 22);
-            w.open.weak_bg_fill = Color32::from_rgba_unmultiplied(255, 81, 0, 22);
-            w.open.bg_stroke = Stroke::new(1.0, Color32::from_rgba_unmultiplied(255, 81, 0, 80));
-            w.open.corner_radius = CornerRadius::same(6);
-
+            // Style menu buttons like website header MenubarTrigger pills
+            ui.spacing_mut().item_spacing.x = 4.0;
             let mut titles = Vec::with_capacity(tree.len());
-            for (_i, (title, items)) in tree.iter().enumerate() {
-                let text = egui::RichText::new(tl!(title)).font(theme::semibold(12.5)).color(t.text);
-                titles.push(ui.menu_button(text, |ui| menu_body(app, ui, items, &mut clicked)).response);
+            for (title, items) in tree.iter() {
+                let icon_name = match *title {
+                    "File" => "folder-open",
+                    "Edit" => "settings",
+                    "Object" => "layers",
+                    "Path" => "spline",
+                    "View" => "eye",
+                    "Help" => "info",
+                    _ => "dc-options",
+                };
+                let translated = tl!(title);
+                let galley = ui.painter().layout_no_wrap(translated.to_string(), theme::semibold(12.5), t.text);
+                let btn_w = 14.0 + 6.0 + galley.size().x + 18.0;
+                let (r, resp) = ui.allocate_exact_size(vec2(btn_w, 28.0), egui::Sense::click());
+                let is_open = egui::Popup::is_id_open(ui.ctx(), egui::Popup::default_response_id(&resp));
+
+                let bg = if is_open {
+                    t.hover
+                } else if resp.hovered() {
+                    t.hover
+                } else {
+                    Color32::TRANSPARENT
+                };
+                let border_color = if is_open || resp.hovered() {
+                    t.border
+                } else {
+                    Color32::TRANSPARENT
+                };
+                ui.painter().rect_filled(r, CornerRadius::same(6), bg);
+                if border_color != Color32::TRANSPARENT {
+                    ui.painter().rect_stroke(r, CornerRadius::same(6), Stroke::new(1.0, border_color), StrokeKind::Inside);
+                }
+
+                let icon_color = if is_open { t.accent } else if resp.hovered() { t.text } else { t.text_dim };
+                let ir = Rect::from_center_size(pos2(r.left() + 15.0, r.center().y), vec2(14.0, 14.0));
+                icons::paint(ui, icon_name, ir, icon_color);
+
+                let text_pos = pos2(r.left() + 25.0, r.center().y - galley.size().y / 2.0);
+                ui.painter().galley(text_pos, galley, t.text);
+
+                egui::Popup::menu(&resp).show(|ui| menu_body(app, ui, items, &mut clicked));
+                titles.push(resp);
             }
             (ui.cursor().min.x, switch_on_hover(ui.ctx(), &titles))
         })

@@ -347,7 +347,7 @@ pub fn apply_tokens(ctx: &egui::Context, t: Tokens) {
     ctx.data_mut(|d| d.insert_temp(egui::Id::NULL, t));
     let mut v = if t.dark { Visuals::dark() } else { Visuals::light() };
     v.panel_fill = t.panel;
-    v.window_fill = t.panel;
+    v.window_fill = if t.dark { hex(0x121216) } else { hex(0xffffff) };
     v.extreme_bg_color = t.input;
     v.faint_bg_color = t.panel_darker;
     v.window_stroke = Stroke::new(1.0, t.border);
