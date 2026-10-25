@@ -2742,7 +2742,15 @@ pub fn menu_bar(app: &mut VectorcraftApp, ui: &mut egui::Ui) -> f32 {
                 let text_pos = pos2(r.left() + 25.0, r.center().y - galley.size().y / 2.0);
                 ui.painter().galley(text_pos, galley, t.text);
 
-                egui::Popup::menu(&resp).show(|ui| menu_body(app, ui, items, &mut clicked));
+                let popup_frame = egui::Frame::popup(ui.style())
+                    .fill(t.app_bar)
+                    .corner_radius(CornerRadius::same(8))
+                    .stroke(Stroke::new(1.0, t.border))
+                    .inner_margin(egui::Margin::same(6));
+
+                egui::Popup::menu(&resp)
+                    .frame(popup_frame)
+                    .show(|ui| menu_body(app, ui, items, &mut clicked));
                 titles.push(resp);
             }
             (ui.cursor().min.x, switch_on_hover(ui.ctx(), &titles))
@@ -2797,6 +2805,8 @@ fn switch_on_hover(ctx: &egui::Context, titles: &[egui::Response]) -> bool {
 /// it scrolls when it is taller than the window.
 fn menu_body(app: &VectorcraftApp, ui: &mut egui::Ui, items: &[Item], clicked: &mut Option<(String, Value)>) {
     let t = Tokens::get(ui.ctx());
+    ui.visuals_mut().panel_fill = t.app_bar;
+    ui.visuals_mut().window_fill = t.app_bar;
     ui.style_mut().spacing.button_padding = egui::vec2(10.0, 5.0);
     ui.style_mut().spacing.item_spacing.y = 2.0;
     let w = &mut ui.visuals_mut().widgets;
@@ -2828,6 +2838,8 @@ fn render_items(app: &VectorcraftApp, ui: &mut egui::Ui, items: &[Item], checks:
             }
             Entry::Sub(label, children) => {
                 ui.menu_button(label, |ui| {
+                    ui.visuals_mut().panel_fill = t.app_bar;
+                    ui.visuals_mut().window_fill = t.app_bar;
                     widgets::menu_scroll(ui, |ui| {
                         ui.set_min_width(200.0);
                         render_items(app, ui, children, checks, clicked);
