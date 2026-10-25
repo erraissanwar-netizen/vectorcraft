@@ -189,7 +189,7 @@ fn tab_strip(app: &mut VectorcraftApp, ui: &mut Ui, active: DockTab) -> bool {
         if anim > 0.005 {
             let fill_height = r.height() * anim;
             let rising_rect = Rect::from_min_max(egui::pos2(r.left(), r.bottom() - fill_height), r.right_bottom());
-            let mut clip_painter = ui.painter().with_clip_rect(r);
+            let clip_painter = ui.painter().with_clip_rect(r);
             clip_painter.rect_filled(rising_rect, CornerRadius::same(6), t.accent);
             if anim > 0.85 {
                 ui.painter().rect_filled(r.expand(1.0), CornerRadius::same(7), Color32::from_rgba_unmultiplied(255, 81, 0, (28.0 * anim) as u8));

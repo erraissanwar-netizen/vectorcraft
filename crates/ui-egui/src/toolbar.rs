@@ -207,14 +207,14 @@ fn body(app: &mut VectorcraftApp, ui: &mut Ui, cols: usize, floating: Option<egu
                     let bg = if resp.hovered() && !is_active { t.hover } else { Color32::TRANSPARENT };
                     let border_color = if resp.hovered() && !is_active { t.input_border } else { Color32::TRANSPARENT };
                     ui.painter().rect_filled(well, CornerRadius::same(6), bg);
-                    if !border_color.is_transparent() {
+                    if border_color != Color32::TRANSPARENT {
                         ui.painter().rect_stroke(well, CornerRadius::same(6), Stroke::new(1.0, border_color), StrokeKind::Inside);
                     }
 
                     if anim > 0.005 {
                         let fill_height = well.height() * anim;
                         let rising_rect = Rect::from_min_max(pos2(well.left(), well.bottom() - fill_height), well.right_bottom());
-                        let mut clip_painter = ui.painter().with_clip_rect(well);
+                        let clip_painter = ui.painter().with_clip_rect(well);
                         clip_painter.rect_filled(rising_rect, CornerRadius::same(6), t.accent);
                         if anim > 0.85 {
                             ui.painter().rect_filled(well.expand(1.0), CornerRadius::same(7), Color32::from_rgba_unmultiplied(255, 81, 0, (28.0 * anim) as u8));
@@ -589,14 +589,14 @@ fn tool_strip(ui: &mut Ui, t: &Tokens, active: &str, tools: &[String]) -> Option
         let bg = if resp.hovered() && !is_active { t.hover } else { Color32::TRANSPARENT };
         let border_color = if resp.hovered() && !is_active { t.input_border } else { Color32::TRANSPARENT };
         ui.painter().rect_filled(well, CornerRadius::same(6), bg);
-        if !border_color.is_transparent() {
+        if border_color != Color32::TRANSPARENT {
             ui.painter().rect_stroke(well, CornerRadius::same(6), Stroke::new(1.0, border_color), StrokeKind::Inside);
         }
 
         if anim > 0.005 {
             let fill_height = well.height() * anim;
             let rising_rect = Rect::from_min_max(pos2(well.left(), well.bottom() - fill_height), well.right_bottom());
-            let mut clip_painter = ui.painter().with_clip_rect(well);
+            let clip_painter = ui.painter().with_clip_rect(well);
             clip_painter.rect_filled(rising_rect, CornerRadius::same(6), t.accent);
             if anim > 0.85 {
                 ui.painter().rect_filled(well.expand(1.0), CornerRadius::same(7), Color32::from_rgba_unmultiplied(255, 81, 0, (28.0 * anim) as u8));

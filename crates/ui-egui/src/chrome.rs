@@ -375,7 +375,7 @@ pub fn doc_tabs(app: &mut VectorcraftApp, ui: &mut Ui) {
         icons::paint(ui, "x", xr, x_color);
         let text_color = if is_active { Color32::WHITE } else if resp.hovered() { t.text } else { t.text_dim };
         let galley = ui.painter().layout_no_wrap(title, theme::semibold(12.5), text_color);
-        let mut clip_painter = ui.painter().with_clip_rect(r.shrink2(vec2(4.0, 0.0)));
+        let clip_painter = ui.painter().with_clip_rect(r.shrink2(vec2(4.0, 0.0)));
         clip_painter.galley(egui::pos2(r.left() + 28.0, r.center().y - galley.size().y / 2.0), galley, text_color);
         if xresp.clicked() {
             close = Some(i);
