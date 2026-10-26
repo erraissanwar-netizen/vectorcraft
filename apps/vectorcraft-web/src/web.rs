@@ -425,6 +425,11 @@ impl eframe::App for WebShell {
                     let _ = app.run("view.fitArtboard", json!({}));
                     ctx.request_repaint();
                 }
+                Some("open_palette") => {
+                    app.ui.palette_open = !app.ui.palette_open;
+                    app.ui.palette_query.clear();
+                    ctx.request_repaint();
+                }
                 _ => {}
             }
         }

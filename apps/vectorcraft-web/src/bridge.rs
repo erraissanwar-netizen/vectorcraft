@@ -108,6 +108,11 @@ pub fn start_listener(inbox: BridgeInbox, ctx: egui::Context) {
                 queue.push(json!({ "action": "zoom_fit" }));
                 ctx.request_repaint();
             }
+            "svgcode:trigger_command_tool" | "svgcode:open_palette" => {
+                let mut queue = inbox.commands.lock().unwrap();
+                queue.push(json!({ "action": "open_palette" }));
+                ctx.request_repaint();
+            }
             _ => {}
         }
     });
