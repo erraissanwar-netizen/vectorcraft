@@ -131,6 +131,7 @@ async fn run(host: Host, canvas: web_sys::HtmlCanvasElement, moving: Option<Movi
                     last_dirty: None,
                     last_revision: 0,
                     last_selection_count: 0,
+                    last_toolbar_double: None,
                 }))
             }),
         )
@@ -328,6 +329,7 @@ struct WebShell {
     last_dirty: Option<bool>,
     last_revision: u64,
     last_selection_count: usize,
+    last_toolbar_double: Option<bool>,
 }
 
 impl WebShell {
@@ -485,6 +487,20 @@ impl eframe::App for WebShell {
                     }
                 }));
             }
+        }
+
+        // Track toolbar layout changes (single/double column) and notify SVGCode host
+        let is_tb_double = app.ui.toolbar_double;
+        if self.last_toolbar_double != Some(is_tb_double) {
+            self.last_toolbar_double = Some(is_tb_double);
+            let tb_width = if is_tb_double { 76.0 } else { 48.0 };
+            crate::bridge::post_to_parent(&json!({
+                "type": "svgcode:toolbar_resize",
+                "payload": {
+                    "width": tb_width,
+                    "isDouble": is_tb_double
+                }
+            }));
         }
     }
 

@@ -2708,7 +2708,11 @@ pub fn menu_bar(app: &mut VectorcraftApp, ui: &mut egui::Ui) -> f32 {
                     "Edit" => "settings",
                     "Object" => "layers",
                     "Path" => "spline",
+                    "Type" => "type",
+                    "Select" => "dc-selection",
+                    "Effect" => "dc-fx",
                     "View" => "eye",
+                    "Window" | "Windows" => "layout-grid",
                     "Help" => "info",
                     _ => "dc-options",
                 };

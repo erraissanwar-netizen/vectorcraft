@@ -5,7 +5,7 @@ use std::sync::Arc;
 use serde_json::json;
 
 use crate::theme::Tokens;
-use crate::{VectorcraftApp, menus};
+use crate::{VectorcraftApp, menus, widgets};
 
 /// Everything the palette searches: (label, command id or `tool:<id>`, shortcut).
 pub fn items() -> Vec<(String, String, String)> {
@@ -81,8 +81,16 @@ pub fn show(app: &mut VectorcraftApp, ctx: &egui::Context) {
     egui::Area::new(egui::Id::new("palette")).order(egui::Order::Foreground).anchor(egui::Align2::CENTER_TOP, [0.0, 90.0]).show(ctx, |ui| {
         egui::Frame::popup(ui.style()).fill(t.panel).inner_margin(egui::Margin::same(10)).show(ui, |ui| {
             ui.set_width(520.0);
-            let r = ui.add(egui::TextEdit::singleline(&mut app.ui.palette_query).hint_text(tl!("Search commands and tools…")).desired_width(500.0));
-            r.request_focus();
+            ui.horizontal(|ui| {
+                let r = ui.add(egui::TextEdit::singleline(&mut app.ui.palette_query).hint_text(tl!("Search commands and tools…")).desired_width(476.0));
+                r.request_focus();
+                if widgets::icon_button(ui, "x", "Close", false, 24.0).clicked() {
+                    app.ui.palette_open = false;
+                }
+            });
+            if ui.input(|i| i.key_pressed(egui::Key::Escape)) {
+                app.ui.palette_open = false;
+            }
             ui.add_space(6.0);
             for (i, e) in matches.iter().enumerate() {
                 let resp = ui.add(
