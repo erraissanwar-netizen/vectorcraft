@@ -407,6 +407,10 @@ impl eframe::App for WebShell {
                         }
                     }
                 }
+                Some("export_as") => {
+                    let _ = app.run("file.exportAs", json!({}));
+                    ctx.request_repaint();
+                }
                 Some("undo") => {
                     let _ = app.run("edit.undo", json!({}));
                     ctx.request_repaint();

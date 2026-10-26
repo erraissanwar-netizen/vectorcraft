@@ -77,6 +77,11 @@ pub fn start_listener(inbox: BridgeInbox, ctx: egui::Context) {
                     ctx.request_repaint();
                 }
             }
+            "svgcode:export_as" => {
+                let mut queue = inbox.commands.lock().unwrap();
+                queue.push(json!({ "action": "export_as" }));
+                ctx.request_repaint();
+            }
             "svgcode:request_export" => {
                 let req_id = parsed.pointer("/payload/requestId").and_then(|v| v.as_str()).unwrap_or("req");
                 let fmt = parsed.pointer("/payload/format").and_then(|v| v.as_str()).unwrap_or("svg");

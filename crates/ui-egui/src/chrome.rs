@@ -60,12 +60,24 @@ pub fn app_bar(app: &mut VectorcraftApp, ui: &mut Ui) {
             let ws = ui.painter().layout_no_wrap(ws_name, egui::FontId::proportional(12.0), t.text);
             let ws_w = (ws.size().x + 36.0).clamp(112.0, 190.0);
             let gap = ui.spacing().item_spacing.x;
-            let with_search = ws_w + 8.0 + gap + 200.0;
+            let with_search = 76.0 + 8.0 + ws_w + 8.0 + gap + 150.0;
             let search_full = room >= with_search;
-            let ws_w = if search_full { ws_w } else { ws_w.min(room - 8.0 - gap - 24.0).max(64.0) };
+            let ws_w = if search_full { ws_w } else { ws_w.min((room - 76.0 - 16.0 - gap - 24.0).max(64.0)) };
             let mut rui = ui.new_child(egui::UiBuilder::new().max_rect(right).layout(egui::Layout::right_to_left(egui::Align::Center)));
             let ui = &mut rui;
-            // Workspace switcher: shows the current workspace, opens Window → Workspace.
+            // 1. Export button at extreme right: triggers File -> Export -> Export As... dialog
+            let (er, eresp) = ui.allocate_exact_size(vec2(76.0, 26.0), Sense::click());
+            let export_bg = if eresp.hovered() { t.accent } else { t.accent_strong };
+            ui.painter().rect_filled(er, CornerRadius::same(6), export_bg);
+            let export_label = ui.painter().layout_no_wrap(tl!("Export…").to_string(), theme::semibold(12.0), Color32::WHITE);
+            let export_text_pos = egui::pos2(er.center().x - export_label.size().x / 2.0, er.center().y - export_label.size().y / 2.0);
+            ui.painter().galley(export_text_pos, export_label, Color32::WHITE);
+            if eresp.on_hover_text(tl!("Export As… (File → Export → Export As…)")).clicked() {
+                app.run("file.exportAs", json!({})).ok();
+            }
+            ui.add_space(8.0);
+
+            // 2. Workspace switcher ("Essentials") pushed to the left of Export button
             let (wr, wresp) = ui.allocate_exact_size(vec2(ws_w, 26.0), Sense::click());
             ui.painter().rect_filled(wr, CornerRadius::same(6), if wresp.hovered() { t.hover } else { t.input });
             ui.painter().rect_stroke(
@@ -81,25 +93,33 @@ pub fn app_bar(app: &mut VectorcraftApp, ui: &mut Ui) {
             ui.add_space(8.0);
             // Search box → command palette.
             let open_palette = if search_full {
-                let (r, resp) = ui.allocate_exact_size(vec2(210.0, 26.0), Sense::click());
-                ui.painter().rect_filled(r, CornerRadius::same(13), t.input);
+                let (r, resp) = ui.allocate_exact_size(vec2(148.0, 26.0), Sense::click());
+                ui.painter().rect_filled(r, CornerRadius::same(6), if resp.hovered() { t.hover } else { t.input });
                 ui.painter().rect_stroke(
                     r,
-                    CornerRadius::same(13),
+                    CornerRadius::same(6),
                     Stroke::new(1.0, if resp.hovered() { t.accent } else { t.input_border }),
                     StrokeKind::Inside,
                 );
-                icons::paint(ui, "search", egui::Rect::from_center_size(r.left_center() + vec2(14.0, 0.0), vec2(13.0, 13.0)), if resp.hovered() { t.accent } else { t.text_dim });
+                icons::paint(ui, "terminal", egui::Rect::from_center_size(r.left_center() + vec2(14.0, 0.0), vec2(13.0, 13.0)), if resp.hovered() { t.accent } else { t.text_dim });
                 ui.painter().text(
-                    r.left_center() + vec2(28.0, 0.0),
+                    r.left_center() + vec2(26.0, 0.0),
                     egui::Align2::LEFT_CENTER,
-                    tl!("Search commands and tools"),
+                    "Command & Tool",
                     egui::FontId::proportional(11.5),
+                    t.text,
+                );
+                let shortcut = if cfg!(target_os = "macos") { "⌘K" } else { "Ctrl+K" };
+                ui.painter().text(
+                    r.right_center() - vec2(10.0, 0.0),
+                    egui::Align2::RIGHT_CENTER,
+                    shortcut,
+                    egui::FontId::proportional(10.0),
                     t.text_dim,
                 );
                 resp.clicked()
             } else {
-                widgets::icon_button(ui, "search", tl!("Search commands and tools"), false, 24.0).clicked()
+                widgets::icon_button(ui, "terminal", "Command & Tool", false, 24.0).clicked()
             };
             if open_palette {
                 app.ui.palette_open = true;
