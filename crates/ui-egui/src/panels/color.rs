@@ -469,6 +469,10 @@ fn spectrum(ui: &mut Ui, mode: Mode, size: egui::Vec2) -> Option<SpectrumHit> {
 }
 
 pub fn show(app: &mut VectorcraftApp, ui: &mut Ui) {
+    ui.spacing_mut().scroll.bar_width = 4.5;
+    ui.spacing_mut().scroll.floating_width = 2.0;
+    ui.spacing_mut().scroll.bar_inner_margin = 0.5;
+    ui.spacing_mut().scroll.bar_outer_margin = 0.0;
     let t = Tokens::get(ui.ctx());
     let tgt = target(app, ui);
     let color = tgt.color();

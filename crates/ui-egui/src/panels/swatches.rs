@@ -623,6 +623,10 @@ const POPOVER_TILE: &str = "swatch-pop-tile";
 
 /// The panel's body; `salt` keys its tiles (see [`tile_id`]).
 fn body(app: &mut VectorcraftApp, ui: &mut Ui, salt: &'static str) {
+    ui.spacing_mut().scroll.bar_width = 4.5;
+    ui.spacing_mut().scroll.floating_width = 2.0;
+    ui.spacing_mut().scroll.bar_inner_margin = 0.5;
+    ui.spacing_mut().scroll.bar_outer_margin = 0.0;
     if app.session.active().is_none() {
         super::empty_state(ui, "swatch-book", tl!("No document"), tl!("Open a document to see its swatches."));
         return;

@@ -351,8 +351,8 @@ pub fn apply_tokens(ctx: &egui::Context, t: Tokens) {
     v.extreme_bg_color = t.input;
     v.faint_bg_color = t.panel_darker;
     v.window_stroke = Stroke::new(1.0, t.border);
-    v.window_corner_radius = CornerRadius::same(8);
-    v.menu_corner_radius = CornerRadius::same(8);
+    v.window_corner_radius = CornerRadius::same(6);
+    v.menu_corner_radius = CornerRadius::same(4);
     v.selection.bg_fill = t.accent.gamma_multiply(0.20);
     v.selection.stroke = Stroke::new(1.0, t.accent);
     v.hyperlink_color = t.accent;
@@ -383,6 +383,10 @@ pub fn apply_tokens(ctx: &egui::Context, t: Tokens) {
         s.spacing.interact_size = egui::vec2(24.0, 24.0);
         s.spacing.menu_margin = egui::Margin::same(6);
         s.spacing.slider_width = 120.0;
+        s.spacing.scroll.bar_width = 4.5;
+        s.spacing.scroll.floating_width = 2.0;
+        s.spacing.scroll.bar_inner_margin = 0.5;
+        s.spacing.scroll.bar_outer_margin = 0.0;
         s.text_styles = [
             (TextStyle::Small, FontId::new(11.0, FontFamily::Proportional)),
             (TextStyle::Body, FontId::new(13.0, FontFamily::Proportional)),

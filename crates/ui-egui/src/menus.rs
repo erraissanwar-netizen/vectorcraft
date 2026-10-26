@@ -2748,7 +2748,7 @@ pub fn menu_bar(app: &mut VectorcraftApp, ui: &mut egui::Ui) -> f32 {
 
                 let popup_frame = egui::Frame::popup(ui.style())
                     .fill(t.app_bar)
-                    .corner_radius(CornerRadius::same(8))
+                    .corner_radius(CornerRadius::same(4))
                     .stroke(Stroke::new(1.0, t.border))
                     .inner_margin(egui::Margin::same(6));
 

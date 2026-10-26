@@ -130,6 +130,10 @@ fn save_selected(app: &mut VectorcraftApp, ctx: &egui::Context) {
 }
 
 pub fn show(app: &mut VectorcraftApp, ui: &mut Ui) {
+    ui.spacing_mut().scroll.bar_width = 4.5;
+    ui.spacing_mut().scroll.floating_width = 2.0;
+    ui.spacing_mut().scroll.bar_inner_margin = 0.5;
+    ui.spacing_mut().scroll.bar_outer_margin = 0.0;
     let t = crate::theme::Tokens::get(ui.ctx());
     let ctx = ui.ctx().clone();
     let h = rule(&ctx);

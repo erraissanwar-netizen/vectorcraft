@@ -206,19 +206,19 @@ fn body(app: &mut VectorcraftApp, ui: &mut Ui, cols: usize, floating: Option<egu
 
                     let bg = if resp.hovered() && !is_active { t.hover } else { Color32::TRANSPARENT };
                     let border_color = if resp.hovered() && !is_active { t.input_border } else { Color32::TRANSPARENT };
-                    ui.painter().rect_filled(well, CornerRadius::same(6), bg);
+                    ui.painter().rect_filled(well, CornerRadius::same(4), bg);
                     if border_color != Color32::TRANSPARENT {
-                        ui.painter().rect_stroke(well, CornerRadius::same(6), Stroke::new(1.0, border_color), StrokeKind::Inside);
+                        ui.painter().rect_stroke(well, CornerRadius::same(4), Stroke::new(1.0, border_color), StrokeKind::Inside);
                     }
 
                     if anim > 0.005 {
                         let fill_height = well.height() * anim;
                         let rising_rect = Rect::from_min_max(pos2(well.left(), well.bottom() - fill_height), well.right_bottom());
                         let clip_painter = ui.painter().with_clip_rect(well);
-                        clip_painter.rect_filled(rising_rect, CornerRadius::same(6), t.accent);
+                        clip_painter.rect_filled(rising_rect, CornerRadius::same(4), t.accent);
                         if anim > 0.85 {
-                            ui.painter().rect_filled(well.expand(1.0), CornerRadius::same(7), Color32::from_rgba_unmultiplied(255, 81, 0, (28.0 * anim) as u8));
-                            clip_painter.rect_stroke(well, CornerRadius::same(6), Stroke::new(1.0, t.accent), StrokeKind::Inside);
+                            ui.painter().rect_filled(well.expand(1.0), CornerRadius::same(5), Color32::from_rgba_unmultiplied(255, 81, 0, (28.0 * anim) as u8));
+                            clip_painter.rect_stroke(well, CornerRadius::same(4), Stroke::new(1.0, t.accent), StrokeKind::Inside);
                         }
                     }
 
@@ -474,9 +474,9 @@ fn raise_floating(ctx: &egui::Context, key: &str) {
 fn flyout_frame(t: &Tokens, flash: bool) -> egui::Frame {
     egui::Frame::NONE
         .fill(t.panel)
-        .corner_radius(CornerRadius::same(8))
+        .corner_radius(CornerRadius::same(4))
         .stroke(if flash { Stroke::new(1.5, t.accent) } else { Stroke::new(1.0, t.border) })
-        .shadow(egui::epaint::Shadow { offset: [0, 4], blur: 16, spread: 0, color: Color32::from_black_alpha(80) })
+        .shadow(egui::epaint::Shadow { offset: [0, 4], blur: 12, spread: 0, color: Color32::from_black_alpha(70) })
 }
 
 /// What a press on a flyout did.
@@ -501,7 +501,7 @@ fn flyout_body(ui: &mut Ui, t: &Tokens, active: &str, tools: &[String], floating
         let rows = if floating { ui.horizontal(|ui| tool_strip(ui, t, active, tools)) } else { ui.vertical(|ui| tool_rows(ui, t, active, tools)) };
         out.chosen = rows.inner;
         let (bar, _) = ui.allocate_exact_size(vec2(BAR, rows.response.rect.height()), Sense::hover());
-        ui.painter().rect_filled(bar, CornerRadius { nw: 0, ne: 8, sw: 0, se: 8 }, t.tab_strip);
+        ui.painter().rect_filled(bar, CornerRadius { nw: 0, ne: 4, sw: 0, se: 4 }, t.tab_strip);
         let grip = if floating {
             let x = egui::Rect::from_min_size(bar.min, vec2(BAR, CLOSE));
             let xr = ui.interact(x, egui::Id::new(("tool-flyout-close", key)), Sense::click());
@@ -538,7 +538,7 @@ fn tool_rows(ui: &mut Ui, t: &Tokens, active: &str, tools: &[String]) -> Option<
         let is_active = active == tool.id;
         let (r, resp) = ui.allocate_exact_size(vec2(w, 30.0), Sense::click());
         if resp.hovered() {
-            ui.painter().rect_filled(r.shrink2(vec2(3.0, 1.0)), CornerRadius::same(6), t.hover);
+            ui.painter().rect_filled(r.shrink2(vec2(3.0, 1.0)), CornerRadius::same(4), t.hover);
         }
         if is_active {
             ui.painter().rect_filled(egui::Rect::from_center_size(r.left_center() + vec2(12.0, 0.0), vec2(5.0, 5.0)), CornerRadius::same(2), t.accent);
@@ -588,19 +588,19 @@ fn tool_strip(ui: &mut Ui, t: &Tokens, active: &str, tools: &[String]) -> Option
 
         let bg = if resp.hovered() && !is_active { t.hover } else { Color32::TRANSPARENT };
         let border_color = if resp.hovered() && !is_active { t.input_border } else { Color32::TRANSPARENT };
-        ui.painter().rect_filled(well, CornerRadius::same(6), bg);
+        ui.painter().rect_filled(well, CornerRadius::same(4), bg);
         if border_color != Color32::TRANSPARENT {
-            ui.painter().rect_stroke(well, CornerRadius::same(6), Stroke::new(1.0, border_color), StrokeKind::Inside);
+            ui.painter().rect_stroke(well, CornerRadius::same(4), Stroke::new(1.0, border_color), StrokeKind::Inside);
         }
 
         if anim > 0.005 {
             let fill_height = well.height() * anim;
             let rising_rect = Rect::from_min_max(pos2(well.left(), well.bottom() - fill_height), well.right_bottom());
             let clip_painter = ui.painter().with_clip_rect(well);
-            clip_painter.rect_filled(rising_rect, CornerRadius::same(6), t.accent);
+            clip_painter.rect_filled(rising_rect, CornerRadius::same(4), t.accent);
             if anim > 0.85 {
-                ui.painter().rect_filled(well.expand(1.0), CornerRadius::same(7), Color32::from_rgba_unmultiplied(255, 81, 0, (28.0 * anim) as u8));
-                clip_painter.rect_stroke(well, CornerRadius::same(6), Stroke::new(1.0, t.accent), StrokeKind::Inside);
+                ui.painter().rect_filled(well.expand(1.0), CornerRadius::same(5), Color32::from_rgba_unmultiplied(255, 81, 0, (28.0 * anim) as u8));
+                clip_painter.rect_stroke(well, CornerRadius::same(4), Stroke::new(1.0, t.accent), StrokeKind::Inside);
             }
         }
 

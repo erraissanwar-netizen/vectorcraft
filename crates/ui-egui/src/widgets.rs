@@ -671,6 +671,10 @@ pub(crate) fn combo<R>(
         .stroke(Stroke::new(1.0, t.input_border))
         .corner_radius(CornerRadius::same(6))
         .show(ui, |ui| {
+            ui.spacing_mut().scroll.bar_width = 4.5;
+            ui.spacing_mut().scroll.floating_width = 2.0;
+            ui.spacing_mut().scroll.bar_inner_margin = 0.5;
+            ui.spacing_mut().scroll.bar_outer_margin = 0.0;
             if searchable {
                 return searchable_combo(ui, ui.id().with(id), current, width - 4.0, list);
             }
@@ -729,6 +733,10 @@ fn searchable_combo<R>(ui: &mut Ui, id: egui::Id, current: &str, width: f32, lis
         .align_alternatives(&[])
         .close_behavior(egui::PopupCloseBehavior::CloseOnClickOutside)
         .show(|ui| {
+            ui.spacing_mut().scroll.bar_width = 4.5;
+            ui.spacing_mut().scroll.floating_width = 2.0;
+            ui.spacing_mut().scroll.bar_inner_margin = 0.5;
+            ui.spacing_mut().scroll.bar_outer_margin = 0.0;
             ui.set_min_width(ui.available_width());
             ui.set_max_height(room);
             ui.style_mut().wrap_mode = Some(egui::TextWrapMode::Extend);
@@ -759,7 +767,13 @@ pub fn popover<R>(resp: &Response, toggle: bool, content: impl FnOnce(&mut Ui) -
         was_open && !clicked_elsewhere
     };
     let inner =
-        egui::Popup::menu(resp).id(id).open_bool(&mut open).close_behavior(egui::PopupCloseBehavior::IgnoreClicks).show(content).map(|r| r.inner);
+        egui::Popup::menu(resp).id(id).open_bool(&mut open).close_behavior(egui::PopupCloseBehavior::IgnoreClicks).show(|ui| {
+            ui.spacing_mut().scroll.bar_width = 4.5;
+            ui.spacing_mut().scroll.floating_width = 2.0;
+            ui.spacing_mut().scroll.bar_inner_margin = 0.5;
+            ui.spacing_mut().scroll.bar_outer_margin = 0.0;
+            content(ui)
+        }).map(|r| r.inner);
     ctx.data_mut(|d| {
         if open {
             d.insert_temp(id, frame);
@@ -774,6 +788,10 @@ pub fn popover<R>(resp: &Response, toggle: bool, content: impl FnOnce(&mut Ui) -
 /// scrolling only past that, so long menus (Window, Effect, a panel's menu) stay reachable on
 /// small windows.
 pub fn menu_scroll<R>(ui: &mut Ui, add_contents: impl FnOnce(&mut Ui) -> R) -> R {
+    ui.spacing_mut().scroll.bar_width = 4.5;
+    ui.spacing_mut().scroll.floating_width = 2.0;
+    ui.spacing_mut().scroll.bar_inner_margin = 0.5;
+    ui.spacing_mut().scroll.bar_outer_margin = 0.0;
     // Room left below the popup's first item, less the popup frame and a small gap.
     const BOTTOM_GAP: f32 = 12.0;
     const MIN_HEIGHT: f32 = 120.0;
@@ -787,6 +805,10 @@ pub fn menu_scroll<R>(ui: &mut Ui, add_contents: impl FnOnce(&mut Ui) -> R) -> R
 /// window is too short for it: with the mouse wheel, or the scroll bar shown while the pointer is
 /// over it.
 pub fn strip_scroll<R>(ui: &mut Ui, id: &str, add_contents: impl FnOnce(&mut Ui) -> R) -> R {
+    ui.spacing_mut().scroll.bar_width = 4.5;
+    ui.spacing_mut().scroll.floating_width = 2.0;
+    ui.spacing_mut().scroll.bar_inner_margin = 0.5;
+    ui.spacing_mut().scroll.bar_outer_margin = 0.0;
     egui::ScrollArea::vertical().id_salt(id).auto_shrink([false, true]).show(ui, add_contents).inner
 }
 

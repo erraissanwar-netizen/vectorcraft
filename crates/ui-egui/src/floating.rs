@@ -303,8 +303,16 @@ pub fn show(app: &mut VectorcraftApp, ctx: &egui::Context) {
         let tall = (screen.bottom() - pos.y - TITLE - STRIP - 60.0).clamp(120.0, 560.0);
         let lone = ids.len() == 1;
         egui::Area::new(area).order(egui::Order::Middle).fixed_pos(pos).show(ctx, |ui| {
+            ui.spacing_mut().scroll.bar_width = 4.5;
+            ui.spacing_mut().scroll.floating_width = 2.0;
+            ui.spacing_mut().scroll.bar_inner_margin = 0.5;
+            ui.spacing_mut().scroll.bar_outer_margin = 0.0;
             let frame = egui::Frame::popup(ui.style()).fill(t.panel).corner_radius(CornerRadius::same(8)).inner_margin(egui::Margin::ZERO);
             frame.show(ui, |ui| {
+                ui.spacing_mut().scroll.bar_width = 4.5;
+                ui.spacing_mut().scroll.floating_width = 2.0;
+                ui.spacing_mut().scroll.bar_inner_margin = 0.5;
+                ui.spacing_mut().scroll.bar_outer_margin = 0.0;
                 ui.spacing_mut().item_spacing = Vec2::ZERO;
                 let tabs: Vec<_> = ids
                     .iter()

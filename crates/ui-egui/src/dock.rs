@@ -92,6 +92,10 @@ pub fn show(app: &mut VectorcraftApp, ui: &mut Ui) {
                 }
                 egui::Frame::NONE.inner_margin(egui::Margin { left: 12, right: 10, top: 10, bottom: 8 }).show(ui, |ui| match active {
                     DockTab::Properties => {
+                        ui.spacing_mut().scroll.bar_width = 4.5;
+                        ui.spacing_mut().scroll.floating_width = 2.0;
+                        ui.spacing_mut().scroll.bar_inner_margin = 0.5;
+                        ui.spacing_mut().scroll.bar_outer_margin = 0.0;
                         egui::ScrollArea::vertical().id_salt("props").auto_shrink([false, false]).show(ui, |ui| panels::properties::show(app, ui));
                     }
                     DockTab::Layers => panels::layers::show(app, ui),
@@ -261,7 +265,15 @@ pub fn floating_panel(app: &mut VectorcraftApp, ctx: &egui::Context) {
     let mut torn = None;
     let area = egui::Area::new(egui::Id::new("icon-panel")).order(egui::Order::Foreground).pivot(egui::Align2::RIGHT_TOP);
     area.fixed_pos(egui::pos2(right, FLYOUT_TOP)).show(ctx, |ui| {
+        ui.spacing_mut().scroll.bar_width = 4.5;
+        ui.spacing_mut().scroll.floating_width = 2.0;
+        ui.spacing_mut().scroll.bar_inner_margin = 0.5;
+        ui.spacing_mut().scroll.bar_outer_margin = 0.0;
         egui::Frame::popup(ui.style()).fill(t.panel).corner_radius(CornerRadius::same(8)).inner_margin(egui::Margin::ZERO).show(ui, |ui| {
+            ui.spacing_mut().scroll.bar_width = 4.5;
+            ui.spacing_mut().scroll.floating_width = 2.0;
+            ui.spacing_mut().scroll.bar_inner_margin = 0.5;
+            ui.spacing_mut().scroll.bar_outer_margin = 0.0;
             ui.set_width(width);
             let (strip, _) = ui.allocate_exact_size(vec2(width, 26.0), Sense::hover());
             ui.painter().rect_filled(strip, CornerRadius { nw: 8, ne: 8, sw: 0, se: 0 }, t.panel_darker);
@@ -319,7 +331,15 @@ pub(crate) fn panel_width(id: &str) -> f32 {
 /// Panel `id`'s contents in a popped-out or floating panel `width` wide; the tabbed group's panels
 /// fill (Layers) or scroll (Properties) `tall` points.
 pub(crate) fn panel_body(app: &mut VectorcraftApp, ui: &mut Ui, id: &str, width: f32, tall: f32) {
+    ui.spacing_mut().scroll.bar_width = 4.5;
+    ui.spacing_mut().scroll.floating_width = 2.0;
+    ui.spacing_mut().scroll.bar_inner_margin = 0.5;
+    ui.spacing_mut().scroll.bar_outer_margin = 0.0;
     egui::Frame::NONE.inner_margin(egui::Margin::same(10)).show(ui, |ui| {
+        ui.spacing_mut().scroll.bar_width = 4.5;
+        ui.spacing_mut().scroll.floating_width = 2.0;
+        ui.spacing_mut().scroll.bar_inner_margin = 0.5;
+        ui.spacing_mut().scroll.bar_outer_margin = 0.0;
         ui.set_width(width - 20.0);
         match DockTab::from_id(id) {
             Some(DockTab::Properties) => {
