@@ -1,7 +1,7 @@
-//! Help → About VectorCraft.
+//! Help → About SVGCode Editor.
 
 use crate::VectorcraftApp;
-use crate::theme;
+use crate::theme::{self, Tokens};
 
 /// The About window, while `UiState::about` is set.
 pub(super) fn show(app: &mut VectorcraftApp, ctx: &egui::Context) {
@@ -9,7 +9,7 @@ pub(super) fn show(app: &mut VectorcraftApp, ctx: &egui::Context) {
         return;
     }
     let mut open = true;
-    egui::Window::new(tl!("About VectorCraft"))
+    egui::Window::new(tl!("About SVGCode Editor"))
         .collapsible(false)
         .resizable(false)
         .open(&mut open)
@@ -17,60 +17,46 @@ pub(super) fn show(app: &mut VectorcraftApp, ctx: &egui::Context) {
         .default_pos(ctx.content_rect().center())
         .frame(egui::Frame::window(&ctx.global_style()).inner_margin(egui::Margin::same(18)))
         .show(ctx, |ui| {
-            // Tabs: About · Contributors · Models (the credits are compiled in, see `credits`).
-            let tab_id = egui::Id::unique("about_tab");
-            let mut tab = ui.data_mut(|d| d.get_temp::<u8>(tab_id)).unwrap_or(0);
+            // One tab: About SVGCode Editor
             ui.horizontal(|ui| {
-                for (i, label) in [tl!("About"), tl!("Contributors"), tl!("Models")].into_iter().enumerate() {
-                    let i = i as u8;
-                    if ui.selectable_label(tab == i, label).clicked() {
-                        tab = i;
-                    }
-                }
+                ui.selectable_label(true, tl!("About SVGCode Editor"));
             });
-            ui.data_mut(|d| d.insert_temp(tab_id, tab));
             ui.separator();
-            match tab {
-                1 => {
-                    ui.set_width(660.0);
-                    crate::credits::contributors_ui(app, ui);
-                }
-                2 => {
-                    ui.set_width(660.0);
-                    crate::credits::models_ui(ui);
-                }
-                _ => about_tab(app, ui),
-            }
+            about_tab(app, ui);
         });
     app.ui.about = open;
 }
 
-/// The About tab: mark, version, community links, licences and the GPU in use.
+/// The About tab: mark, description, and link to VectorCraft.
 fn about_tab(app: &mut VectorcraftApp, ui: &mut egui::Ui) {
-    ui.set_width(380.0);
+    let t = Tokens::get(ui.ctx());
+    ui.set_width(420.0);
     ui.horizontal(|ui| {
-        let (r, _) = ui.allocate_exact_size(egui::vec2(44.0, 44.0), egui::Sense::hover());
+        let (r, _) = ui.allocate_exact_size(egui::vec2(64.0, 32.0), egui::Sense::hover());
         crate::brand::paint_mark(ui, r);
+        ui.add_space(8.0);
         ui.vertical(|ui| {
-            ui.label(egui::RichText::new("VectorCraft").font(theme::semibold(22.0)));
-            ui.label(crate::i18n::fmt(
-                tl!("Version {version} — open-source vector illustration in pure Rust."),
-                &[("version", env!("CARGO_PKG_VERSION"))],
-            ));
+            ui.label(egui::RichText::new("SVGCode Editor").font(theme::semibold(20.0)).color(t.text));
         });
     });
     ui.add_space(12.0);
-    crate::community::links(app, ui);
-    ui.add_space(12.0);
     ui.label(
         egui::RichText::new(tl!(
-            "Part of ArtCraft. MIT OR Apache-2.0. Fonts: Source Sans 3, Inter, JetBrains Mono (OFL). Icons: Lucide (ISC) + VectorCraft."
+            "SVGCode Editor is an online vector graphics editor that makes creating, editing, and customizing SVG designs simple and accessible. From drawing shapes and editing paths to designing icons, logos, and illustrations, our goal is to provide a powerful SVG editing experience directly in your browser."
         ))
-        .size(11.0),
+        .size(12.0)
+        .color(t.text),
     );
-    // The GPU the window renders with, for bug reports (Preferences › Performance picks it).
+    ui.add_space(10.0);
+    ui.horizontal_wrapped(|ui| {
+        ui.label(
+            egui::RichText::new(tl!("Fast, modern in-browser vector graphics editor powered by WebAssembly."))
+                .size(11.5)
+                .color(t.text_dim),
+        );
+    });
     if let Some(adapter) = &app.graphics_adapter {
-        ui.add_space(6.0);
-        ui.label(egui::RichText::new(crate::i18n::fmt(tl!("Graphics: {adapter}"), &[("adapter", adapter.as_str())])).size(11.0));
+        ui.add_space(8.0);
+        ui.label(egui::RichText::new(crate::i18n::fmt(tl!("Graphics: {adapter}"), &[("adapter", adapter.as_str())])).size(10.5).color(t.text_dim));
     }
 }

@@ -51,7 +51,7 @@ use crate::DocState;
 pub const COMPLEX_OBJECTS: usize = 20_000;
 
 /// The extension of a copy's document entry.
-const DOC_EXT: &str = ".vectorcraft";
+const DOC_EXT: &str = ".svgcode";
 /// The extension of a copy's details entry.
 const META_EXT: &str = ".json";
 /// The extension of an image entry (see [`blob_name`]).

@@ -61,9 +61,11 @@ pub const MIN_VERSION: u32 = 1;
 pub const COMPRESSED_SINCE: u32 = 3;
 /// Most pixels on the longer side of an embedded preview.
 pub const PREVIEW_MAX: u32 = 256;
-pub const EXTENSION: &str = "vectorcraft";
-/// Extension and format name from before the project was renamed (DrawCraft): still opened.
-pub const LEGACY_EXTENSION: &str = "drawcraft";
+pub const EXTENSION: &str = "svgcode";
+/// Extension and format name from before the project was renamed (VectorCraft): still opened.
+pub const LEGACY_EXTENSION: &str = "vectorcraft";
+/// Format name from before the project was renamed (DrawCraft): still opened.
+pub const OLD_LEGACY_EXTENSION: &str = "drawcraft";
 /// Most bytes the JSON of a compressed file may unpack to (a guard against decompression bombs,
 /// as are [`MAX_BLOB`] and [`MAX_BLOBS`]). A compressed save refuses a document past any of them,
 /// so every file VectorCraft writes reads back. On wasm32 the cap is a quarter of the native
@@ -83,7 +85,9 @@ const MAX_UNPACKED: u64 = 512 << 20;
 
 /// Is `ext` (without the dot, any case) a native document extension?
 pub fn is_native_ext(ext: &str) -> bool {
-    ext.eq_ignore_ascii_case(EXTENSION) || ext.eq_ignore_ascii_case(LEGACY_EXTENSION)
+    ext.eq_ignore_ascii_case(EXTENSION)
+        || ext.eq_ignore_ascii_case(LEGACY_EXTENSION)
+        || ext.eq_ignore_ascii_case(OLD_LEGACY_EXTENSION)
 }
 
 /// Does the file name or path end in a native document extension?
@@ -93,7 +97,7 @@ pub fn is_native_name(name: &str) -> bool {
 
 #[derive(Debug, thiserror::Error)]
 pub enum FormatError {
-    #[error("not a VectorCraft file: {0}")]
+    #[error("not an SVGCode file: {0}")]
     NotVectorcraft(String),
     #[error("file version {0} is newer than this VectorCraft supports ({VERSION})")]
     TooNew(u32),
@@ -560,7 +564,7 @@ pub fn load_file(bytes: &[u8]) -> Result<NativeFile, FormatError> {
         let why = if e.to_string().contains("recursion limit") { format!("its objects are nested too deep ({e})") } else { e.to_string() };
         FormatError::NotVectorcraft(why)
     })?;
-    if f.format != EXTENSION && f.format != LEGACY_EXTENSION {
+    if f.format != EXTENSION && f.format != LEGACY_EXTENSION && f.format != OLD_LEGACY_EXTENSION {
         return Err(FormatError::NotVectorcraft(format!("format is `{}`", f.format)));
     }
     if f.version > VERSION {

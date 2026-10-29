@@ -462,6 +462,18 @@ pub fn run_ui_command(app: &mut VectorcraftApp, id: &str, p: &Value) -> Option<R
         },
         "file.export.pdf" if p.as_object().is_none_or(|o| o.is_empty()) => crate::dialogs::open_save_pdf(app, &json!({})),
         "file.export.pdf" => io::export_pdf(app, p.clone()),
+        "help.contact" => {
+            app.open_url("https://svgcode.com/contact");
+            Ok(Value::Null)
+        },
+        "help.reportBug" => {
+            app.open_url("https://svgcode.com/#report-bug");
+            Ok(Value::Null)
+        },
+        "view.toggleScrollLock" => {
+            app.open_url("https://svgcode.com/#toggle-scroll");
+            Ok(Value::Null)
+        },
         "help.about" => {
             app.ui.about = true;
             Ok(Value::Null)

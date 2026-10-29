@@ -8,8 +8,9 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Brightness {
     Dark,
-    #[default]
     MediumDark,
+    MediumLight,
+    #[default]
     MediumLight,
     Light,
 }
@@ -263,8 +264,8 @@ impl Tokens {
                 icon: hex(0x272c36),
                 hover: hex(0xc5ccd6),
                 tool_active: hex(0xb6bec9),
-                accent: hex(0xd9472f),
-                accent_strong: hex(0xd14a33),
+                accent: hex(0xff5100),
+                accent_strong: hex(0xe04800),
                 flyout_active: hex(0xc23e28),
                 row_selected: hex(0xe7c4bd),
                 pasteboard: hex(0xb9c0cb),
@@ -277,26 +278,26 @@ impl Tokens {
             },
             Brightness::Light => Tokens {
                 dark: false,
-                app_bar: hex(0xe6e9ee),
+                app_bar: hex(0xffffff),
                 panel: hex(0xf3f5f8),
                 panel_darker: hex(0xe9ecf1),
-                tab_strip: hex(0xe6e9ee),
+                tab_strip: hex(0xfdfdfd),
                 input: hex(0xffffff),
                 input_border: hex(0xc3c9d3),
-                border: hex(0xd0d5dd),
+                border: hex(0xe2e8f0),
                 divider: hex(0xdde1e8),
                 text: hex(0x1b1f27),
                 text_strong: hex(0x000000),
                 text_dim: hex(0x58606e),
                 text_disabled: hex(0x9aa1ad),
                 icon: hex(0x2a303b),
-                hover: hex(0xe3e7ed),
+                hover: hex(0xf1f5f9),
                 tool_active: hex(0xd5dbe3),
-                accent: hex(0xd9472f),
-                accent_strong: hex(0xd14a33),
+                accent: hex(0xff5100),
+                accent_strong: hex(0xe04800),
                 flyout_active: hex(0xc23e28),
-                row_selected: hex(0xf8d9d2),
-                pasteboard: hex(0xdfe3e9),
+                row_selected: hex(0xffede6),
+                pasteboard: hex(0xfdfdfd),
                 ruler: hex(0xeceff3),
                 ruler_tick: hex(0x58606e),
                 measure_bg: Color32::from_rgba_unmultiplied(243, 245, 248, 235),
@@ -589,12 +590,12 @@ pub fn apply_with(ctx: &egui::Context, b: Brightness, accent: Accent, scheme: Sc
     ctx.data_mut(|d| d.insert_temp(egui::Id::NULL, t));
     let mut v = if t.dark { Visuals::dark() } else { Visuals::light() };
     v.panel_fill = t.panel;
-    v.window_fill = t.panel;
+    v.window_fill = t.app_bar;
     v.extreme_bg_color = t.input;
     v.faint_bg_color = t.panel_darker;
     v.window_stroke = Stroke::new(1.0, t.border);
     v.window_corner_radius = CornerRadius::same(10);
-    v.menu_corner_radius = CornerRadius::same(8);
+    v.menu_corner_radius = CornerRadius::same(4);
     v.selection.bg_fill = t.accent.gamma_multiply(0.55);
     v.selection.stroke = Stroke::new(1.0, t.accent);
     v.hyperlink_color = t.accent;

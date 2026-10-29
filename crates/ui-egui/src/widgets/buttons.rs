@@ -11,16 +11,31 @@ pub fn paint_icon_button(ui: &mut Ui, resp: Response, icon: &str, tip: &str, sel
     let t = Tokens::get(ui.ctx());
     let rect = resp.rect;
     let size = rect.width();
-    let bg = if selected {
-        t.tool_active
-    } else if resp.hovered() {
-        t.hover
-    } else {
-        Color32::TRANSPARENT
-    };
-    ui.painter().rect_filled(rect, CornerRadius::same(5), bg);
+
+    let anim = ui.ctx().animate_bool_with_time(resp.id.with("icon_button_active_anim"), selected, 0.35);
+
+    let bg = if resp.hovered() && !selected { t.hover } else { Color32::TRANSPARENT };
+    let border_color = if resp.hovered() && !selected { t.input_border } else { Color32::TRANSPARENT };
+    ui.painter().rect_filled(rect, CornerRadius::same(6), bg);
+    if border_color != Color32::TRANSPARENT {
+        ui.painter().rect_stroke(rect, CornerRadius::same(6), Stroke::new(1.0, border_color), StrokeKind::Inside);
+    }
+
+    if anim > 0.005 {
+        let fill_height = rect.height() * anim;
+        let rising_rect = Rect::from_min_max(pos2(rect.left(), rect.bottom() - fill_height), rect.right_bottom());
+        let mut clip_painter = ui.painter().with_clip_rect(rect);
+        clip_painter.rect_filled(rising_rect, CornerRadius::same(6), t.accent);
+        if anim > 0.85 {
+            ui.painter().rect_filled(rect.expand(1.0), CornerRadius::same(7), Color32::from_rgba_unmultiplied(255, 81, 0, (28.0 * anim) as u8));
+            clip_painter.rect_stroke(rect, CornerRadius::same(6), Stroke::new(1.0, t.accent), StrokeKind::Inside);
+        }
+    }
+
     let pad = (size * 0.2).round();
-    icons::paint(ui, icon, rect.shrink(pad), if selected { t.text_strong } else { t.icon });
+    let base_icon_color = if resp.hovered() { t.text } else { t.icon };
+    let icon_color = if anim >= 0.5 { Color32::WHITE } else { base_icon_color };
+    icons::paint(ui, icon, rect.shrink(pad), icon_color);
     resp.widget_info(|| icon_button_info(ui.is_enabled(), selected, tl!(tip)));
     if !tip.is_empty() { resp.on_hover_text(tl!(tip)) } else { resp }
 }
@@ -30,7 +45,7 @@ pub fn flat_button(ui: &mut Ui, text: &str, width: f32) -> Response {
     let t = Tokens::get(ui.ctx());
     let (rect, resp) = ui.allocate_exact_size(vec2(width, 24.0), Sense::click());
     let rect = rect.shrink2(vec2(0.0, 0.5));
-    ui.painter().rect_filled(rect, CornerRadius::same(5), t.button);
+    ui.painter().rect_filled(rect, CornerRadius::same(6), t.button);
     flat_fill(ui, rect, &resp);
     ui.painter().with_clip_rect(rect).text(rect.center(), egui::Align2::CENTER_CENTER, tl!(text), egui::FontId::proportional(12.5), t.text_strong);
     resp.widget_info(|| egui::WidgetInfo::labeled(egui::Role::Button, ui.is_enabled(), tl!(text)));
@@ -44,7 +59,7 @@ pub fn flat_button_fit(ui: &mut Ui, text: &str, min_width: f32) -> Response {
     let width = (galley.size().x + 24.0).max(min_width);
     let (rect, resp) = ui.allocate_exact_size(vec2(width, 24.0), Sense::click());
     let rect = rect.shrink2(vec2(0.0, 0.5));
-    ui.painter().rect_filled(rect, CornerRadius::same(5), t.button);
+    ui.painter().rect_filled(rect, CornerRadius::same(6), t.button);
     flat_fill(ui, rect, &resp);
     ui.painter().with_clip_rect(rect).text(rect.center(), egui::Align2::CENTER_CENTER, tl!(text), egui::FontId::proportional(12.5), t.text_strong);
     resp.widget_info(|| egui::WidgetInfo::labeled(egui::Role::Button, ui.is_enabled(), tl!(text)));
@@ -71,7 +86,7 @@ pub fn split_button_named(ui: &mut Ui, text: &str, arrow_tip: &str, width: f32) 
     let arrow_rect = Rect::from_min_max(pos2(split, rect.top()), rect.max);
     let main = ui.interact(main_rect, ui.scope_id().with((text, "split")), Sense::click());
     let arrow = ui.interact(arrow_rect, ui.scope_id().with((text, "split-arrow")), Sense::click());
-    ui.painter().rect_filled(rect, CornerRadius::same(5), t.button);
+    ui.painter().rect_filled(rect, CornerRadius::same(6), t.button);
     flat_fill(ui, main_rect, &main);
     flat_fill(ui, arrow_rect, &arrow);
     ui.painter().vline(split, rect.y_range().shrink(5.0), Stroke::new(1.0, t.panel));
@@ -95,9 +110,9 @@ pub fn split_button_named(ui: &mut Ui, text: &str, arrow_tip: &str, width: f32) 
 fn flat_fill(ui: &Ui, rect: Rect, resp: &Response) {
     let t = Tokens::get(ui.ctx());
     if resp.is_pointer_button_down_on() {
-        ui.painter().rect_filled(rect, CornerRadius::same(5), t.tool_active);
+        ui.painter().rect_filled(rect, CornerRadius::same(6), t.tool_active);
     } else if resp.hovered() {
-        ui.painter().rect_filled(rect, CornerRadius::same(5), t.hover);
+        ui.painter().rect_filled(rect, CornerRadius::same(6), t.hover);
     }
 }
 

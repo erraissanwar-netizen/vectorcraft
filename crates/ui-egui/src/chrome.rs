@@ -109,12 +109,8 @@ pub fn app_bar(app: &mut VectorcraftApp, ui: &mut Ui) {
                     app.ui.palette_query.clear();
                 }
             }
-            if discord {
-                ui.add_space(10.0);
-                crate::community::discord_button(app, ui, false);
-            }
             if app.services.native_menu.is_some() {
-                let title = ui.painter().layout_no_wrap("VectorCraft".into(), egui::FontId::proportional(13.5), t.text);
+                let title = ui.painter().layout_no_wrap("SVGCode Editor".into(), egui::FontId::proportional(13.5), t.text);
                 let title_rect = egui::Rect::from_center_size(full.center(), title.size());
                 // Keep the title centered only while the interactive groups leave room for it.
                 if title_rect.left() >= menus_end + 8.0 && title_rect.right() <= ui.min_rect().left() - 8.0 {

@@ -259,6 +259,18 @@ pub fn invoke(app: &mut VectorcraftApp, id: &str, p: Value) {
         }
         return;
     }
+    if id == "view.toggleScrollLock" {
+        app.open_url("https://svgcode.com/#toggle-scroll");
+        return;
+    }
+    if id == "help.contact" {
+        app.open_url("https://svgcode.com/contact");
+        return;
+    }
+    if id == "help.reportBug" {
+        app.open_url("https://svgcode.com/#report-bug");
+        return;
+    }
     // Help links: the command returns the URL; a menu click opens it (agents just get the URL).
     if matches!(id, "help.discord" | "help.website" | "help.appPage" | "help.github") {
         app.open_link(id);

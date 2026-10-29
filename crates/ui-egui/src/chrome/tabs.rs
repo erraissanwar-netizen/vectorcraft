@@ -53,8 +53,10 @@ pub fn doc_tabs(app: &mut VectorcraftApp, ui: &mut Ui) {
         })
         .collect();
     let widths: Vec<f32> = tabs.iter().map(|(_, g)| g.size().x + 50.0).collect();
-    let overflow = widths.iter().sum::<f32>() > strip.width();
-    let room = strip.width() - if overflow { MORE } else { 0.0 };
+    let reserved_right = 215.0; // Reserve space for "Edit in Code Editor" button at extreme right
+    let tab_area_width = (strip.width() - reserved_right).max(80.0);
+    let overflow = widths.iter().sum::<f32>() > tab_area_width;
+    let room = tab_area_width - if overflow { MORE } else { 0.0 };
     let first = if overflow { first_tab_shown(&widths, active, room) } else { 0 };
     let mut x = strip.left();
     let mut activate = None;
@@ -72,14 +74,15 @@ pub fn doc_tabs(app: &mut VectorcraftApp, ui: &mut Ui) {
         } else if resp.hovered() {
             ui.painter().rect_filled(r, 0.0, t.hover.gamma_multiply(0.4));
         }
-        ui.painter().line_segment([r.right_top(), r.right_bottom()], Stroke::new(1.5, t.border));
+        ui.painter().line_segment([r.right_top(), r.right_bottom()], Stroke::new(1.0, t.border));
         // The × where each platform puts a tab's: before the title on macOS, after it elsewhere
         // (#673).
         let (x_center, title_left) = if CLOSE_BEFORE_TITLE { (r.left() + 16.0, r.left() + 32.0) } else { (r.right() - 16.0, r.left() + 14.0) };
         let xr = egui::Rect::from_center_size(egui::pos2(x_center, r.center().y), vec2(12.0, 12.0));
         let xresp = ui.interact(xr.expand(3.0), ui.scope_id().with(("tabx", i)), Sense::click());
         icons::paint(ui, "x", xr, if xresp.hovered() { t.text_strong } else { t.text });
-        ui.painter().galley(egui::pos2(title_left, r.center().y - galley.size().y / 2.0), galley.clone(), t.text);
+        let mut clip_painter = ui.painter().with_clip_rect(r.shrink2(vec2(4.0, 0.0)));
+        clip_painter.galley(egui::pos2(title_left, r.center().y - galley.size().y / 2.0), galley.clone(), t.text);
         hovering_art |= crate::document_drag::hover_tab(app, &resp, i, xr.expand(3.0));
         if xresp.clicked() {
             close = Some(i);
