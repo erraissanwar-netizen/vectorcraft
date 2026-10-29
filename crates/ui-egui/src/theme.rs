@@ -11,7 +11,6 @@ pub enum Brightness {
     MediumDark,
     MediumLight,
     #[default]
-    MediumLight,
     Light,
 }
 

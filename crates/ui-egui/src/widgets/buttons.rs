@@ -24,7 +24,7 @@ pub fn paint_icon_button(ui: &mut Ui, resp: Response, icon: &str, tip: &str, sel
     if anim > 0.005 {
         let fill_height = rect.height() * anim;
         let rising_rect = Rect::from_min_max(pos2(rect.left(), rect.bottom() - fill_height), rect.right_bottom());
-        let mut clip_painter = ui.painter().with_clip_rect(rect);
+        let clip_painter = ui.painter().with_clip_rect(rect);
         clip_painter.rect_filled(rising_rect, CornerRadius::same(6), t.accent);
         if anim > 0.85 {
             ui.painter().rect_filled(rect.expand(1.0), CornerRadius::same(7), Color32::from_rgba_unmultiplied(255, 81, 0, (28.0 * anim) as u8));
