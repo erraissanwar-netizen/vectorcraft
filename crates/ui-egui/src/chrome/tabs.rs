@@ -53,7 +53,7 @@ pub fn doc_tabs(app: &mut VectorcraftApp, ui: &mut Ui) {
         })
         .collect();
     let widths: Vec<f32> = tabs.iter().map(|(_, g)| g.size().x + 50.0).collect();
-    let reserved_right = 215.0; // Reserve space for "Edit in Code Editor" button at extreme right
+    let reserved_right = 195.0; // Reserve space for "Edit in Code Editor" button at extreme right
     let tab_area_width = (strip.width() - reserved_right).max(80.0);
     let overflow = widths.iter().sum::<f32>() > tab_area_width;
     let room = tab_area_width - if overflow { MORE } else { 0.0 };
@@ -133,7 +133,7 @@ pub fn doc_tabs(app: &mut VectorcraftApp, ui: &mut Ui) {
     // reaches the bottom of the window, so every document of a large session stays reachable
     // (#4017).
     if overflow {
-        let more = egui::Rect::from_min_max(egui::pos2(strip.right() - MORE, strip.top()), egui::pos2(strip.right(), strip.bottom() - 1.0));
+        let more = egui::Rect::from_min_max(egui::pos2(strip.left() + tab_area_width - MORE, strip.top()), egui::pos2(strip.left() + tab_area_width, strip.bottom() - 1.0));
         let resp = ui.interact(more, ui.scope_id().with("tabs-more"), Sense::click());
         ui.painter().rect_filled(more, 0.0, if resp.hovered() { t.hover.gamma_multiply(0.4) } else { t.tab_strip });
         icons::paint(ui, "chevrons-right", egui::Rect::from_center_size(more.center(), vec2(14.0, 14.0)), t.text);
@@ -149,6 +149,52 @@ pub fn doc_tabs(app: &mut VectorcraftApp, ui: &mut Ui) {
             });
         });
     }
+    // "Edit in Code Editor" button at extreme right of document bar
+    let edit_btn_w = 176.0;
+    let edit_btn_h = 27.0;
+    let edit_btn_rect = egui::Rect::from_min_size(
+        egui::pos2(strip.right() - edit_btn_w - 8.0, strip.top() + (strip.height() - edit_btn_h) * 0.5),
+        vec2(edit_btn_w, edit_btn_h),
+    );
+    let edit_btn_resp = ui.interact(edit_btn_rect, ui.scope_id().with("edit_in_code_btn"), Sense::click());
+    if edit_btn_resp.hovered() {
+        ui.ctx().set_cursor_icon(egui::CursorIcon::PointingHand);
+    }
+    let bg_color = if edit_btn_resp.hovered() {
+        t.hover
+    } else {
+        if t.dark { egui::Color32::from_rgb(0x18, 0x1b, 0x22) } else { egui::Color32::WHITE }
+    };
+    let border_color = if edit_btn_resp.hovered() {
+        t.accent
+    } else {
+        t.border
+    };
+    ui.painter().rect_filled(edit_btn_rect, CornerRadius::same(6), bg_color);
+    ui.painter().rect_stroke(edit_btn_rect, CornerRadius::same(6), Stroke::new(1.0, border_color), egui::StrokeKind::Inside);
+
+    icons::paint(ui, "external-link", egui::Rect::from_center_size(edit_btn_rect.left_center() + vec2(14.0, 0.0), vec2(13.0, 13.0)), if edit_btn_resp.hovered() { t.accent } else { t.icon });
+
+    let edit_label = match crate::i18n::current() {
+        "zh" | "zh-CN" | "cn" => "在代码编辑器中编辑",
+        "es" => "Editar en el editor de código",
+        "pt" => "Editar no editor de código",
+        "it" => "Modifica nell'editor di codice",
+        "de" => "Im Code-Editor bearbeiten",
+        "fr" => "Modifier dans l'éditeur de code",
+        "nl" => "Bewerken in code-editor",
+        "ru" => "Редактировать в редакторе кода",
+        "ja" | "jp" => "コードエディタで編集",
+        _ => "Edit in Code Editor",
+    };
+    let text_color = if edit_btn_resp.hovered() { t.accent } else { t.text };
+    let text_galley = ui.painter().layout_no_wrap(edit_label.into(), theme::semibold(12.0), text_color);
+    ui.painter().galley(egui::pos2(edit_btn_rect.left() + 26.0, edit_btn_rect.center().y - text_galley.size().y / 2.0), text_galley, text_color);
+
+    if edit_btn_resp.clicked() {
+        ui.ctx().open_url(egui::OpenUrl::same_tab("#navigate-code"));
+    }
+
     if let Some(i) = close {
         if let Err(e) = crate::unsaved::close(app, i) {
             app.status(e);

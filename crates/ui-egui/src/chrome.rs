@@ -32,12 +32,12 @@ use tabs::{CLOSE_BEFORE_TITLE, first_tab_shown, tab_title};
 pub use tabs::{doc_tabs, isolation_bar};
 
 /// The application bar's height, in points (compact, as in PhotoCraft).
-pub const APP_BAR_HEIGHT: f32 = 34.0;
+pub const APP_BAR_HEIGHT: f32 = 45.0;
 /// The brand mark's side.
 #[allow(dead_code)]
 const MARK: f32 = 18.0;
 /// Height of the workspace switcher.
-const WIDGET_H: f32 = 22.0;
+const WIDGET_H: f32 = 30.0;
 
 /// The application bar: brand mark, Home, menus, then Discord, search and the workspace switcher
 /// at the right. With [`VectorcraftApp::custom_titlebar`] it is also the window's title bar
@@ -60,7 +60,7 @@ pub fn app_bar(app: &mut VectorcraftApp, ui: &mut Ui) {
         ui.horizontal_centered(|ui| {
             // With the system title bar the OS draws its own icon: no in-app brand mark.
             if !system {
-                let (_, resp) = ui.allocate_exact_size(vec2(72.0, 26.0), Sense::click());
+                let (_, resp) = ui.allocate_exact_size(vec2(76.0, 32.0), Sense::click());
                 if resp.clicked() {
                     ui.ctx().open_url(egui::OpenUrl::same_tab("/"));
                 }
@@ -82,7 +82,7 @@ pub fn app_bar(app: &mut VectorcraftApp, ui: &mut Ui) {
             let ws_w = (ws.size().x + 36.0).clamp(112.0, 190.0);
             let gap = ui.spacing().item_spacing.x;
             // The search icon, as in PhotoCraft: shown while a minimal switcher fits beside it.
-            let icon = 28.0;
+            let icon = 30.0;
             let search = room >= 64.0 + 8.0 + gap + icon;
             let ws_w = ws_w.min(room - 8.0 - gap - if search { icon } else { 0.0 }).max(64.0);
             let mut rui = ui.new_child(egui::UiBuilder::new().max_rect(right).layout(egui::Layout::right_to_left(egui::Align::Center)));
@@ -136,8 +136,8 @@ pub fn system_title_bar(app: &VectorcraftApp) -> bool {
 pub fn window_title(app: &VectorcraftApp) -> String {
     app.session
         .active()
-        .map(|d| format!("{}{} \u{2014} VectorCraft", if d.is_dirty() { "*" } else { "" }, d.title()))
-        .unwrap_or_else(|| "VectorCraft".into())
+        .map(|d| format!("{}{} \u{2014} SVGCode", if d.is_dirty() { "*" } else { "" }, d.title()))
+        .unwrap_or_else(|| "SVGCode".into())
 }
 
 /// Keep the OS window title (and the taskbar / Alt-Tab entry) on the active file. Sends

@@ -54,9 +54,12 @@ fn about_tab(app: &mut VectorcraftApp, ui: &mut egui::Ui) {
                 .size(11.5)
                 .color(t.text_dim),
         );
-        ui.hyperlink_to("VectorCraft", "https://github.com/storytold/vectorcraft");
         ui.label(
-            egui::RichText::new(tl!(" project, customized and enhanced for the SVGCode platform."))
+            egui::RichText::new(tl!("Explore vector tools, convert icons, and create graphics at "))
+                .size(11.5)
+                .color(t.text_dim),
+        );
+        ui.hyperlink_to("svgcode.com", "https://svgcode.com");
                 .size(11.5)
                 .color(t.text_dim),
         );
