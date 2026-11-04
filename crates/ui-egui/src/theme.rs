@@ -69,8 +69,8 @@ impl Accent {
     /// with white lettering.
     fn colors(self, dark: bool) -> (u32, u32) {
         match (self, dark) {
-            (Accent::Coral, true) => (0xf06a52, 0xe8573f),
-            (Accent::Coral, false) => (0xd9472f, 0xd14a33),
+            (Accent::Coral, true) => (0xff5100, 0xe04800),
+            (Accent::Coral, false) => (0xff5100, 0xe04800),
             (Accent::Blue, true) => (0x5b96ff, 0x2f74f0),
             (Accent::Blue, false) => (0x2563eb, 0x1f5ad6),
             (Accent::Violet, true) => (0xa98bff, 0x7c55f0),
@@ -190,8 +190,8 @@ impl Tokens {
             icon: hex(0xc9d0dc),
             hover: hex(0x262b35),
             tool_active: hex(0x2f3541),
-            accent: hex(0xf06a52),
-            accent_strong: hex(0xe8573f),
+            accent: hex(0xff5100),
+            accent_strong: hex(0xe04800),
             row_selected: hex(0x3a2a2c),
             pasteboard: hex(0x101217),
             ruler: hex(0x13161c),

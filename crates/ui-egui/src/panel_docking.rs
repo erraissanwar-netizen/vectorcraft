@@ -1080,28 +1080,54 @@ pub(crate) fn show(app: &mut VectorcraftApp, ui: &mut egui::Ui) {
     let mut output = dock.show_content(ui, &layout, &style, &mut PanelContent { app: &mut *app });
     app.dock_rt.space = craft_ui::docking::float_space(&ctx, area);
 
-    // Sidebar dock tabs: homepage tab change animation (rising accent fill y: 100% -> 0% with white text)
+    // Sidebar dock tabs and right sidebar selected tools: homepage tab change animation (rising accent fill y: 100% -> 0% with white text/icon)
     let t = crate::theme::Tokens::get(&ctx);
     for (hit, rect) in craft_ui::docking::DockArea::<String>::hit_rects(&ctx, area) {
-        if let craft_ui::docking::Hit::Tab(ref id) = hit {
-            let is_tab_active = layout.panel_state(id) == craft_ui::docking::PanelState::Front;
-            let anim = ui.ctx().animate_bool_with_time(ui.id().with(("docktab_active_anim", id)), is_tab_active, 0.35);
+        match hit {
+            craft_ui::docking::Hit::Tab(ref id) => {
+                let is_tab_active = layout.panel_state(id) == craft_ui::docking::PanelState::Front;
+                let anim = ui.ctx().animate_bool_with_time(ui.id().with(("docktab_active_anim", id)), is_tab_active, 0.35);
 
-            if anim > 0.005 {
-                let fill_height = rect.height() * anim;
-                let rising_rect = egui::Rect::from_min_max(egui::pos2(rect.left(), rect.bottom() - fill_height), rect.right_bottom());
-                let mut clip_painter = ui.painter().with_clip_rect(rect);
-                clip_painter.rect_filled(rising_rect, egui::CornerRadius::same(6), t.accent);
-                if anim > 0.85 {
-                    clip_painter.rect_stroke(rect, egui::CornerRadius::same(6), egui::Stroke::new(1.0, t.accent), egui::StrokeKind::Inside);
+                if anim > 0.005 {
+                    let tab_rect = rect.shrink2(egui::vec2(2.0, 2.0));
+                    let fill_height = tab_rect.height() * anim;
+                    let rising_rect = egui::Rect::from_min_max(egui::pos2(tab_rect.left(), tab_rect.bottom() - fill_height), tab_rect.right_bottom());
+                    let mut clip_painter = ui.painter().with_clip_rect(tab_rect);
+                    clip_painter.rect_filled(rising_rect, egui::CornerRadius::same(6), t.accent);
+                    if anim > 0.85 {
+                        clip_painter.rect_stroke(tab_rect, egui::CornerRadius::same(6), egui::Stroke::new(1.0, t.accent), egui::StrokeKind::Inside);
+                    }
+                    let label = crate::panels::library_panel::tab_label(app, id)
+                        .or_else(|| crate::state::all_panels().find(|p| p.0 == id).map(|p| tl!(p.1).to_string()))
+                        .unwrap_or_else(|| id.clone());
+                    let text_color = if anim >= 0.5 { egui::Color32::WHITE } else { t.text };
+                    let galley = ui.painter().layout_no_wrap(label, crate::theme::semibold(12.5), text_color);
+                    clip_painter.galley(egui::pos2(tab_rect.center().x - galley.size().x / 2.0, tab_rect.center().y - galley.size().y / 2.0), galley, text_color);
                 }
-                let label = crate::panels::library_panel::tab_label(app, id)
-                    .or_else(|| crate::state::all_panels().find(|p| p.0 == id).map(|p| tl!(p.1).to_string()))
-                    .unwrap_or_else(|| id.clone());
-                let text_color = if anim >= 0.5 { egui::Color32::WHITE } else { t.text };
-                let galley = ui.painter().layout_no_wrap(label, crate::theme::semibold(12.5), text_color);
-                clip_painter.galley(egui::pos2(rect.center().x - galley.size().x / 2.0, rect.center().y - galley.size().y / 2.0), galley, text_color);
             }
+            craft_ui::docking::Hit::Icon(ref id) => {
+                let is_icon_active = app.ui.open_panel.as_deref() == Some(id.as_str());
+                let anim = ui.ctx().animate_bool_with_time(ui.id().with(("dockicon_active_anim", id)), is_icon_active, 0.35);
+
+                if anim > 0.005 {
+                    let box_rect = rect.shrink2(egui::vec2(2.0, 2.0));
+                    let fill_height = box_rect.height() * anim;
+                    let rising_rect = egui::Rect::from_min_max(egui::pos2(box_rect.left(), box_rect.bottom() - fill_height), box_rect.right_bottom());
+                    let mut clip_painter = ui.painter().with_clip_rect(box_rect);
+                    clip_painter.rect_filled(rising_rect, egui::CornerRadius::same(6), t.accent);
+                    if anim > 0.85 {
+                        clip_painter.rect_stroke(box_rect, egui::CornerRadius::same(6), egui::Stroke::new(1.0, t.accent), egui::StrokeKind::Inside);
+                    }
+                    let icon_name = crate::state::rail_panel(id).map(|p| p.2).or_else(|| crate::panels::library_panel::parse(id).map(|_| "library"));
+                    if let Some(icon_name) = icon_name {
+                        let icon_size = 18.0;
+                        let icon_rect = egui::Rect::from_center_size(box_rect.center(), egui::vec2(icon_size, icon_size));
+                        let icon_color = if anim >= 0.5 { egui::Color32::WHITE } else { t.icon };
+                        crate::icons::paint(ui, icon_name, icon_rect, icon_color);
+                    }
+                }
+            }
+            _ => {}
         }
     }
     if let Some(panel) = output.focused.take() {

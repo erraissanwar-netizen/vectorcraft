@@ -58,38 +58,75 @@ pub fn doc_tabs(app: &mut VectorcraftApp, ui: &mut Ui) {
     let overflow = widths.iter().sum::<f32>() > tab_area_width;
     let room = tab_area_width - if overflow { MORE } else { 0.0 };
     let first = if overflow { first_tab_shown(&widths, active, room) } else { 0 };
-    let mut x = strip.left();
+    let tab_gap = 6.0;
+    let mut x = strip.left() + 6.0;
     let mut activate = None;
     let mut close = None;
     let mut hovering_art = false;
-    for (i, ((_, galley), w)) in tabs.iter().zip(&widths).enumerate().skip(first) {
+    for (i, ((title, _), w)) in tabs.iter().zip(&widths).enumerate().skip(first) {
         if x + w > strip.left() + room && Some(i) != active {
             break;
         }
         let is_active = Some(i) == active;
-        let r = egui::Rect::from_min_size(egui::pos2(x, strip.top()), vec2(*w, strip.height() - 1.0));
-        let resp = ui.interact(r, ui.scope_id().with(("tab", i)), Sense::click());
-        if is_active {
-            ui.painter().rect_filled(r, 0.0, t.panel);
-        } else if resp.hovered() {
-            ui.painter().rect_filled(r, 0.0, t.hover.gamma_multiply(0.4));
+        let tab_box = egui::Rect::from_min_size(egui::pos2(x, strip.top() + 4.0), vec2(*w, strip.height() - 8.0));
+        let resp = ui.interact(tab_box, ui.scope_id().with(("tab", i)), Sense::click());
+
+        // Homepage tabs rising animation (0.35s ease-out)
+        let anim = ui.ctx().animate_bool_with_time(ui.scope_id().with(("doc_tab_anim", i)), is_active, 0.35);
+
+        // Inactive tab pill box styling: subtle border, rounded-md (6px), slight hover background
+        if anim < 0.99 {
+            let bg = if resp.hovered() { t.hover.gamma_multiply(0.4) } else { egui::Color32::TRANSPARENT };
+            let border = if resp.hovered() { t.input_border } else { t.border };
+            ui.painter().rect_filled(tab_box, egui::CornerRadius::same(6), bg);
+            ui.painter().rect_stroke(tab_box, egui::CornerRadius::same(6), Stroke::new(1.0, border), egui::StrokeKind::Inside);
         }
-        ui.painter().line_segment([r.right_top(), r.right_bottom()], Stroke::new(1.0, t.border));
+
+        // Active tab pill box styling: rising accent gradient/fill (#ff5100) from bottom (y: 100% -> 0%)
+        if anim > 0.005 {
+            let fill_height = tab_box.height() * anim;
+            let rising_rect = egui::Rect::from_min_max(
+                egui::pos2(tab_box.left(), tab_box.bottom() - fill_height),
+                tab_box.right_bottom(),
+            );
+            let mut clip_painter = ui.painter().with_clip_rect(tab_box);
+            clip_painter.rect_filled(rising_rect, egui::CornerRadius::same(6), t.accent);
+            if anim > 0.85 {
+                clip_painter.rect_stroke(tab_box, egui::CornerRadius::same(6), Stroke::new(1.0, t.accent), egui::StrokeKind::Inside);
+            }
+        }
+
         // The × where each platform puts a tab's: before the title on macOS, after it elsewhere
-        // (#673).
-        let (x_center, title_left) = if CLOSE_BEFORE_TITLE { (r.left() + 16.0, r.left() + 32.0) } else { (r.right() - 16.0, r.left() + 14.0) };
-        let xr = egui::Rect::from_center_size(egui::pos2(x_center, r.center().y), vec2(12.0, 12.0));
-        let xresp = ui.interact(xr.expand(3.0), ui.scope_id().with(("tabx", i)), Sense::click());
-        icons::paint(ui, "x", xr, if xresp.hovered() { t.text_strong } else { t.text });
-        let clip_painter = ui.painter().with_clip_rect(r.shrink2(vec2(4.0, 0.0)));
-        clip_painter.galley(egui::pos2(title_left, r.center().y - galley.size().y / 2.0), galley.clone(), t.text);
-        hovering_art |= crate::document_drag::hover_tab(app, &resp, i, xr.expand(3.0));
+        let (x_center, title_left) = if CLOSE_BEFORE_TITLE {
+            (tab_box.left() + 14.0, tab_box.left() + 28.0)
+        } else {
+            (tab_box.right() - 14.0, tab_box.left() + 12.0)
+        };
+        let xr = egui::Rect::from_center_size(egui::pos2(x_center, tab_box.center().y), vec2(12.0, 12.0));
+        let xresp = ui.interact(xr.expand(2.0), ui.scope_id().with(("tabx", i)), Sense::click());
+
+        let x_color = if anim >= 0.5 {
+            if xresp.hovered() { egui::Color32::from_white_alpha(200) } else { egui::Color32::WHITE }
+        } else {
+            if xresp.hovered() { t.text_strong } else { t.text_dim }
+        };
+        icons::paint(ui, "x", xr, x_color);
+
+        // Tab title text (white when active, text_dim when inactive)
+        let text_color = if anim >= 0.5 { egui::Color32::WHITE } else { t.text_dim };
+        let title_galley = ui.painter().layout_no_wrap(title.clone(), theme::semibold(title_size), text_color);
+        let text_max_right = if CLOSE_BEFORE_TITLE { tab_box.right() - 8.0 } else { xr.left() - 4.0 };
+        let text_clip = egui::Rect::from_min_max(egui::pos2(title_left, tab_box.top()), egui::pos2(text_max_right.max(title_left), tab_box.bottom()));
+        let text_painter = ui.painter().with_clip_rect(text_clip);
+        text_painter.galley(egui::pos2(title_left, tab_box.center().y - title_galley.size().y / 2.0), title_galley, text_color);
+
+        hovering_art |= crate::document_drag::hover_tab(app, &resp, i, xr.expand(2.0));
         if xresp.clicked() {
             close = Some(i);
         } else if resp.clicked() {
             activate = Some(i);
         }
-        x += w;
+        x += w + tab_gap;
     }
     crate::document_drag::finish_tabs(ui.ctx(), hovering_art);
     // The » button: every open document, the active one checked. The list scrolls once it
