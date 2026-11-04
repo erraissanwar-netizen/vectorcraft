@@ -54,7 +54,7 @@ pub fn menu_bar(app: &mut VectorcraftApp, ui: &mut egui::Ui) -> f32 {
                 let translated = tl!(title);
                 let galley = ui.painter().layout_no_wrap(translated.to_string(), theme::semibold(12.5), t.text);
                 let btn_w = 14.0 + 6.0 + galley.size().x + 18.0;
-                let (r, resp) = ui.allocate_exact_size(vec2(btn_w, 28.0), egui::Sense::click());
+                let (r, resp) = ui.allocate_exact_size(vec2(btn_w, 26.0), egui::Sense::click());
                 let is_open = egui::Popup::is_id_open(ui.ctx(), egui::Popup::default_response_id(&resp));
 
                 let bg = if is_open || resp.hovered() {

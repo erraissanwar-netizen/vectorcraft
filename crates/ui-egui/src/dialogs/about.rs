@@ -50,7 +50,13 @@ fn about_tab(app: &mut VectorcraftApp, ui: &mut egui::Ui) {
     ui.add_space(10.0);
     ui.horizontal_wrapped(|ui| {
         ui.label(
-            egui::RichText::new(tl!("Fast, modern in-browser vector graphics editor powered by WebAssembly."))
+            egui::RichText::new(tl!("SVGCode Editor is built on the open-source "))
+                .size(11.5)
+                .color(t.text_dim),
+        );
+        ui.hyperlink_to("VectorCraft", "https://github.com/storytold/vectorcraft");
+        ui.label(
+            egui::RichText::new(tl!(" project, customized and enhanced for the SVGCode platform."))
                 .size(11.5)
                 .color(t.text_dim),
         );

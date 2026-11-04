@@ -1079,6 +1079,31 @@ pub(crate) fn show(app: &mut VectorcraftApp, ui: &mut egui::Ui) {
     }
     let mut output = dock.show_content(ui, &layout, &style, &mut PanelContent { app: &mut *app });
     app.dock_rt.space = craft_ui::docking::float_space(&ctx, area);
+
+    // Sidebar dock tabs: homepage tab change animation (rising accent fill y: 100% -> 0% with white text)
+    let t = crate::theme::Tokens::get(&ctx);
+    for (hit, rect) in craft_ui::docking::DockArea::<String>::hit_rects(&ctx, area) {
+        if let craft_ui::docking::Hit::Tab(ref id) = hit {
+            let is_tab_active = layout.panel_state(id) == craft_ui::docking::PanelState::Front;
+            let anim = ui.ctx().animate_bool_with_time(ui.id().with(("docktab_active_anim", id)), is_tab_active, 0.35);
+
+            if anim > 0.005 {
+                let fill_height = rect.height() * anim;
+                let rising_rect = egui::Rect::from_min_max(egui::pos2(rect.left(), rect.bottom() - fill_height), rect.right_bottom());
+                let mut clip_painter = ui.painter().with_clip_rect(rect);
+                clip_painter.rect_filled(rising_rect, egui::CornerRadius::same(6), t.accent);
+                if anim > 0.85 {
+                    clip_painter.rect_stroke(rect, egui::CornerRadius::same(6), egui::Stroke::new(1.0, t.accent), egui::StrokeKind::Inside);
+                }
+                let label = crate::panels::library_panel::tab_label(app, id)
+                    .or_else(|| crate::state::all_panels().find(|p| p.0 == id).map(|p| tl!(p.1).to_string()))
+                    .unwrap_or_else(|| id.clone());
+                let text_color = if anim >= 0.5 { egui::Color32::WHITE } else { t.text };
+                let galley = ui.painter().layout_no_wrap(label, crate::theme::semibold(12.5), text_color);
+                clip_painter.galley(egui::pos2(rect.center().x - galley.size().x / 2.0, rect.center().y - galley.size().y / 2.0), galley, text_color);
+            }
+        }
+    }
     if let Some(panel) = output.focused.take() {
         app.dock_rt.focused = Some(panel);
     }

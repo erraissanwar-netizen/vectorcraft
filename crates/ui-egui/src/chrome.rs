@@ -32,8 +32,9 @@ use tabs::{CLOSE_BEFORE_TITLE, first_tab_shown, tab_title};
 pub use tabs::{doc_tabs, isolation_bar};
 
 /// The application bar's height, in points (compact, as in PhotoCraft).
-pub const APP_BAR_HEIGHT: f32 = 32.0;
+pub const APP_BAR_HEIGHT: f32 = 34.0;
 /// The brand mark's side.
+#[allow(dead_code)]
 const MARK: f32 = 18.0;
 /// Height of the workspace switcher.
 const WIDGET_H: f32 = 22.0;
@@ -59,15 +60,12 @@ pub fn app_bar(app: &mut VectorcraftApp, ui: &mut Ui) {
         ui.horizontal_centered(|ui| {
             // With the system title bar the OS draws its own icon: no in-app brand mark.
             if !system {
-                let (r, _) = ui.allocate_exact_size(vec2(MARK, MARK), Sense::hover());
-                crate::brand::paint_mark(ui, r);
-                ui.add_space(6.0);
+                let (_, resp) = ui.allocate_exact_size(vec2(72.0, 26.0), Sense::click());
+                if resp.clicked() {
+                    ui.ctx().open_url(egui::OpenUrl::same_tab("/"));
+                }
+                ui.add_space(4.0);
             }
-            let on_home = menus::home_showing(app);
-            if widgets::icon_button(ui, "house", tl!("Home"), on_home, 20.0).clicked() {
-                app.run("app.home", json!({})).ok();
-            }
-            ui.add_space(2.0);
             // With the macOS menu bar the menus are at the top of the screen instead.
             let menus_end = if app.services.native_menu.is_some() { ui.cursor().min.x } else { menus::menu_bar(app, ui) };
             // The right-side group fills the space after the menus from the right; when it runs
@@ -100,8 +98,8 @@ pub fn app_bar(app: &mut VectorcraftApp, ui: &mut Ui) {
             // Search → command palette (its shortcut opens it too).
             if search {
                 let tip = match menus::shortcut_of("help.commandPalette") {
-                    Some(sc) => format!("{}  ({})", tl!("Search commands and tools"), menus::pretty_shortcut(sc)),
-                    None => tl!("Search commands and tools").to_string(),
+                    Some(sc) => format!("{}  ({})", tl!("Command & Tool"), menus::pretty_shortcut(sc)),
+                    None => tl!("Command & Tool").to_string(),
                 };
                 if widgets::icon_button(ui, "search", &tip, app.ui.palette_open, icon).clicked() {
                     app.ui.palette_open = !app.ui.palette_open;
