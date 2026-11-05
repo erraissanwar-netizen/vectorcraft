@@ -1102,7 +1102,11 @@ pub(crate) fn show(app: &mut VectorcraftApp, ui: &mut egui::Ui) {
                         .unwrap_or_else(|| id.clone());
                     let text_color = if anim >= 0.5 { egui::Color32::WHITE } else { t.text };
                     let galley = ui.painter().layout_no_wrap(label, crate::theme::semibold(12.5), text_color);
-                    clip_painter.galley(egui::pos2(tab_rect.center().x - galley.size().x / 2.0, tab_rect.center().y - galley.size().y / 2.0), galley, text_color);
+                    clip_painter.galley(
+                        egui::pos2(tab_rect.center().x - galley.size().x / 2.0, tab_rect.center().y - galley.size().y / 2.0),
+                        galley,
+                        text_color,
+                    );
                 }
             }
             craft_ui::docking::Hit::Icon(ref id) => {
