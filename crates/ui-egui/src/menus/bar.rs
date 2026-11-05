@@ -1,9 +1,9 @@
 use super::entries::{Row, entry, pretty_shortcut};
 use super::invoke::{field_event, focused_text_field, invoke, to_field};
 use super::tree::menu_tree_named;
-use egui::{Color32, CornerRadius, Rect, Stroke, StrokeKind, pos2, vec2};
-use crate::{icons, theme};
 use super::*;
+use crate::{icons, theme};
+use egui::{Color32, CornerRadius, Rect, Stroke, StrokeKind, pos2, vec2};
 
 /// Render the menu bar.
 /// The in-window menu bar. Returns where its titles end (x): the bar itself takes the full width.
@@ -57,22 +57,20 @@ pub fn menu_bar(app: &mut VectorcraftApp, ui: &mut egui::Ui) -> f32 {
                 let (r, resp) = ui.allocate_exact_size(vec2(btn_w, 26.0), egui::Sense::click());
                 let is_open = egui::Popup::is_id_open(ui.ctx(), egui::Popup::default_response_id(&resp));
 
-                let bg = if is_open || resp.hovered() {
-                    t.hover
-                } else {
-                    Color32::TRANSPARENT
-                };
-                let border_color = if is_open || resp.hovered() {
-                    t.border
-                } else {
-                    Color32::TRANSPARENT
-                };
+                let bg = if is_open || resp.hovered() { t.hover } else { Color32::TRANSPARENT };
+                let border_color = if is_open || resp.hovered() { t.border } else { Color32::TRANSPARENT };
                 ui.painter().rect_filled(r, CornerRadius::same(6), bg);
                 if border_color != Color32::TRANSPARENT {
                     ui.painter().rect_stroke(r, CornerRadius::same(6), Stroke::new(1.0, border_color), StrokeKind::Inside);
                 }
 
-                let icon_color = if is_open { t.accent } else if resp.hovered() { t.text } else { t.text_dim };
+                let icon_color = if is_open {
+                    t.accent
+                } else if resp.hovered() {
+                    t.text
+                } else {
+                    t.text_dim
+                };
                 let ir = Rect::from_center_size(pos2(r.left() + 15.0, r.center().y), vec2(14.0, 14.0));
                 icons::paint(ui, icon_name, ir, icon_color);
 
@@ -85,9 +83,7 @@ pub fn menu_bar(app: &mut VectorcraftApp, ui: &mut egui::Ui) -> f32 {
                     .stroke(Stroke::new(1.0, t.border))
                     .inner_margin(egui::Margin::same(6));
 
-                egui::Popup::menu(&resp)
-                    .frame(popup_frame)
-                    .show(|ui| menu_body(app, ui, items, &mut clicked));
+                egui::Popup::menu(&resp).frame(popup_frame).show(|ui| menu_body(app, ui, items, &mut clicked));
                 titles.push(resp);
             }
             (ui.cursor().min.x, switch_on_hover(ui.ctx(), &titles))

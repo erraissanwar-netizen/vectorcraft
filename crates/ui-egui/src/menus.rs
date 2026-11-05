@@ -10,11 +10,11 @@ use serde_json::{Value, json};
 use vectorcraft_engine::cmd::fileio::SaveMode;
 
 use crate::VectorcraftApp;
+use crate::icons;
 use crate::io;
 use crate::panels::character::Face;
 use crate::state::next_zoom;
 use crate::theme::{Brightness, Tokens};
-use crate::icons;
 use crate::widgets;
 
 #[derive(Clone, Debug)]

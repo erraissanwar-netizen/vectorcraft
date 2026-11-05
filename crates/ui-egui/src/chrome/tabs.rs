@@ -85,10 +85,7 @@ pub fn doc_tabs(app: &mut VectorcraftApp, ui: &mut Ui) {
         // Active tab pill box styling: rising accent gradient/fill (#ff5100) from bottom (y: 100% -> 0%)
         if anim > 0.005 {
             let fill_height = tab_box.height() * anim;
-            let rising_rect = egui::Rect::from_min_max(
-                egui::pos2(tab_box.left(), tab_box.bottom() - fill_height),
-                tab_box.right_bottom(),
-            );
+            let rising_rect = egui::Rect::from_min_max(egui::pos2(tab_box.left(), tab_box.bottom() - fill_height), tab_box.right_bottom());
             let mut clip_painter = ui.painter().with_clip_rect(tab_box);
             clip_painter.rect_filled(rising_rect, egui::CornerRadius::same(6), t.accent);
             if anim > 0.85 {
@@ -97,11 +94,8 @@ pub fn doc_tabs(app: &mut VectorcraftApp, ui: &mut Ui) {
         }
 
         // The × where each platform puts a tab's: before the title on macOS, after it elsewhere
-        let (x_center, title_left) = if CLOSE_BEFORE_TITLE {
-            (tab_box.left() + 14.0, tab_box.left() + 28.0)
-        } else {
-            (tab_box.right() - 14.0, tab_box.left() + 12.0)
-        };
+        let (x_center, title_left) =
+            if CLOSE_BEFORE_TITLE { (tab_box.left() + 14.0, tab_box.left() + 28.0) } else { (tab_box.right() - 14.0, tab_box.left() + 12.0) };
         let xr = egui::Rect::from_center_size(egui::pos2(x_center, tab_box.center().y), vec2(12.0, 12.0));
         let xresp = ui.interact(xr.expand(2.0), ui.scope_id().with(("tabx", i)), Sense::click());
 
@@ -133,7 +127,10 @@ pub fn doc_tabs(app: &mut VectorcraftApp, ui: &mut Ui) {
     // reaches the bottom of the window, so every document of a large session stays reachable
     // (#4017).
     if overflow {
-        let more = egui::Rect::from_min_max(egui::pos2(strip.left() + tab_area_width - MORE, strip.top()), egui::pos2(strip.left() + tab_area_width, strip.bottom() - 1.0));
+        let more = egui::Rect::from_min_max(
+            egui::pos2(strip.left() + tab_area_width - MORE, strip.top()),
+            egui::pos2(strip.left() + tab_area_width, strip.bottom() - 1.0),
+        );
         let resp = ui.interact(more, ui.scope_id().with("tabs-more"), Sense::click());
         ui.painter().rect_filled(more, 0.0, if resp.hovered() { t.hover.gamma_multiply(0.4) } else { t.tab_strip });
         icons::paint(ui, "chevrons-right", egui::Rect::from_center_size(more.center(), vec2(14.0, 14.0)), t.text);
@@ -160,20 +157,18 @@ pub fn doc_tabs(app: &mut VectorcraftApp, ui: &mut Ui) {
     if edit_btn_resp.hovered() {
         ui.ctx().set_cursor_icon(egui::CursorIcon::PointingHand);
     }
-    let bg_color = if edit_btn_resp.hovered() {
-        t.hover
-    } else {
-        if t.dark { egui::Color32::from_rgb(0x18, 0x1b, 0x22) } else { egui::Color32::WHITE }
-    };
-    let border_color = if edit_btn_resp.hovered() {
-        t.accent
-    } else {
-        t.border
-    };
+    let bg_color =
+        if edit_btn_resp.hovered() { t.hover } else { if t.dark { egui::Color32::from_rgb(0x18, 0x1b, 0x22) } else { egui::Color32::WHITE } };
+    let border_color = if edit_btn_resp.hovered() { t.accent } else { t.border };
     ui.painter().rect_filled(edit_btn_rect, CornerRadius::same(6), bg_color);
     ui.painter().rect_stroke(edit_btn_rect, CornerRadius::same(6), Stroke::new(1.0, border_color), egui::StrokeKind::Inside);
 
-    icons::paint(ui, "external-link", egui::Rect::from_center_size(edit_btn_rect.left_center() + vec2(14.0, 0.0), vec2(13.0, 13.0)), if edit_btn_resp.hovered() { t.accent } else { t.icon });
+    icons::paint(
+        ui,
+        "external-link",
+        egui::Rect::from_center_size(edit_btn_rect.left_center() + vec2(14.0, 0.0), vec2(13.0, 13.0)),
+        if edit_btn_resp.hovered() { t.accent } else { t.icon },
+    );
 
     let edit_label = match crate::i18n::current() {
         "zh" | "zh-CN" | "cn" => "在代码编辑器中编辑",

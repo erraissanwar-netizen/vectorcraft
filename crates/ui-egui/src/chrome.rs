@@ -35,6 +35,7 @@ pub use tabs::{doc_tabs, isolation_bar};
 pub const APP_BAR_HEIGHT: f32 = 45.0;
 /// The brand mark's side.
 #[allow(dead_code)]
+#[allow(dead_code)]
 const MARK: f32 = 18.0;
 /// Height of the workspace switcher.
 const WIDGET_H: f32 = 30.0;
@@ -134,10 +135,7 @@ pub fn system_title_bar(app: &VectorcraftApp) -> bool {
 /// marks unsaved changes, like the `*` in the document tabs), or just the app name with no
 /// document open.
 pub fn window_title(app: &VectorcraftApp) -> String {
-    app.session
-        .active()
-        .map(|d| format!("{}{} \u{2014} SVGCode", if d.is_dirty() { "*" } else { "" }, d.title()))
-        .unwrap_or_else(|| "SVGCode".into())
+    app.session.active().map(|d| format!("{}{} \u{2014} SVGCode", if d.is_dirty() { "*" } else { "" }, d.title())).unwrap_or_else(|| "SVGCode".into())
 }
 
 /// Keep the OS window title (and the taskbar / Alt-Tab entry) on the active file. Sends

@@ -465,15 +465,15 @@ pub fn run_ui_command(app: &mut VectorcraftApp, id: &str, p: &Value) -> Option<R
         "help.contact" => {
             app.open_url("https://svgcode.com/contact");
             Ok(Value::Null)
-        },
+        }
         "help.reportBug" => {
             app.open_url("https://svgcode.com/#report-bug");
             Ok(Value::Null)
-        },
+        }
         "view.toggleScrollLock" => {
             app.open_url("https://svgcode.com/#toggle-scroll");
             Ok(Value::Null)
-        },
+        }
         "help.about" => {
             app.ui.about = true;
             Ok(Value::Null)

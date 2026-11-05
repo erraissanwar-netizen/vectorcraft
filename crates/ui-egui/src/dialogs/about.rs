@@ -49,20 +49,8 @@ fn about_tab(app: &mut VectorcraftApp, ui: &mut egui::Ui) {
     );
     ui.add_space(10.0);
     ui.horizontal_wrapped(|ui| {
-        ui.label(
-            egui::RichText::new(tl!("SVGCode Editor is built on the open-source "))
-                .size(11.5)
-                .color(t.text_dim),
-        );
-        ui.label(
-            egui::RichText::new(tl!("Explore vector tools, convert icons, and create graphics at "))
-                .size(11.5)
-                .color(t.text_dim),
-        );
+        ui.label(egui::RichText::new(tl!("Explore vector tools, convert icons, and create graphics at ")).size(11.5).color(t.text_dim));
         ui.hyperlink_to("svgcode.com", "https://svgcode.com");
-                .size(11.5)
-                .color(t.text_dim),
-        );
     });
     if let Some(adapter) = &app.graphics_adapter {
         ui.add_space(8.0);

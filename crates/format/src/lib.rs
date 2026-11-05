@@ -85,9 +85,7 @@ const MAX_UNPACKED: u64 = 512 << 20;
 
 /// Is `ext` (without the dot, any case) a native document extension?
 pub fn is_native_ext(ext: &str) -> bool {
-    ext.eq_ignore_ascii_case(EXTENSION)
-        || ext.eq_ignore_ascii_case(LEGACY_EXTENSION)
-        || ext.eq_ignore_ascii_case(OLD_LEGACY_EXTENSION)
+    ext.eq_ignore_ascii_case(EXTENSION) || ext.eq_ignore_ascii_case(LEGACY_EXTENSION) || ext.eq_ignore_ascii_case(OLD_LEGACY_EXTENSION)
 }
 
 /// Does the file name or path end in a native document extension?
