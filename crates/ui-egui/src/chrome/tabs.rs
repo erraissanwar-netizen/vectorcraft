@@ -170,10 +170,10 @@ pub fn doc_tabs(app: &mut VectorcraftApp, ui: &mut Ui) {
         if edit_btn_resp.hovered() { t.accent } else { t.icon },
     );
 
-    let edit_label = match crate::i18n::current() {
-        "zh" | "zh-CN" | "cn" => "在代码编辑器中编辑",
+    let edit_label = match crate::i18n::current().code() {
+        "zh" | "zh-CN" | "zh-hant" | "cn" => "在代码编辑器中编辑",
         "es" => "Editar en el editor de código",
-        "pt" => "Editar no editor de código",
+        "pt" | "pt-br" => "Editar no editor de código",
         "it" => "Modifica nell'editor di codice",
         "de" => "Im Code-Editor bearbeiten",
         "fr" => "Modifier dans l'éditeur de code",
