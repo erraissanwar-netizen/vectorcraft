@@ -41,7 +41,7 @@
 use std::collections::{HashMap, HashSet};
 use std::sync::{Arc, Weak};
 
-use egui::{Color32, CornerRadius, Sense, Stroke, StrokeKind, Ui, vec2};
+use egui::{Color32, Sense, Stroke, StrokeKind, Ui, vec2};
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use vectorcraft_doc::{Document, LiveShape, Node, NodeId, NodeKind};

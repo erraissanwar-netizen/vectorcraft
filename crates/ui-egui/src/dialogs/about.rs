@@ -19,7 +19,7 @@ pub(super) fn show(app: &mut VectorcraftApp, ctx: &egui::Context) {
         .show(ctx, |ui| {
             // One tab: About SVGCode Editor
             ui.horizontal(|ui| {
-                ui.selectable_label(true, tl!("About SVGCode Editor"));
+                let _ = ui.selectable_label(true, tl!("About SVGCode Editor"));
             });
             ui.separator();
             about_tab(app, ui);

@@ -5,7 +5,7 @@ use std::sync::Arc;
 use serde_json::json;
 
 use crate::theme::Tokens;
-use crate::{VectorcraftApp, menus, widgets};
+use crate::{VectorcraftApp, menus};
 
 /// Everything the palette searches: (label, command id or `tool:<id>`, shortcut).
 pub fn items() -> Vec<(String, String, String)> {

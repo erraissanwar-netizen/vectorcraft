@@ -86,7 +86,7 @@ pub fn doc_tabs(app: &mut VectorcraftApp, ui: &mut Ui) {
         if anim > 0.005 {
             let fill_height = tab_box.height() * anim;
             let rising_rect = egui::Rect::from_min_max(egui::pos2(tab_box.left(), tab_box.bottom() - fill_height), tab_box.right_bottom());
-            let mut clip_painter = ui.painter().with_clip_rect(tab_box);
+            let clip_painter = ui.painter().with_clip_rect(tab_box);
             clip_painter.rect_filled(rising_rect, egui::CornerRadius::same(6), t.accent);
             if anim > 0.85 {
                 clip_painter.rect_stroke(tab_box, egui::CornerRadius::same(6), Stroke::new(1.0, t.accent), egui::StrokeKind::Inside);

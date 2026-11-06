@@ -1086,13 +1086,13 @@ pub(crate) fn show(app: &mut VectorcraftApp, ui: &mut egui::Ui) {
         match hit {
             craft_ui::docking::Hit::Tab(ref id) => {
                 let is_tab_active = layout.panel_state(id) == craft_ui::docking::PanelState::Front;
-                let anim = ui.ctx().animate_bool_with_time(ui.id().with(("docktab_active_anim", id)), is_tab_active, 0.35);
+                let anim = ui.ctx().animate_bool_with_time(ui.scope_id().with(("docktab_active_anim", id)), is_tab_active, 0.35);
 
                 if anim > 0.005 {
                     let tab_rect = rect.shrink2(egui::vec2(2.0, 2.0));
                     let fill_height = tab_rect.height() * anim;
                     let rising_rect = egui::Rect::from_min_max(egui::pos2(tab_rect.left(), tab_rect.bottom() - fill_height), tab_rect.right_bottom());
-                    let mut clip_painter = ui.painter().with_clip_rect(tab_rect);
+                    let clip_painter = ui.painter().with_clip_rect(tab_rect);
                     clip_painter.rect_filled(rising_rect, egui::CornerRadius::same(6), t.accent);
                     if anim > 0.85 {
                         clip_painter.rect_stroke(tab_rect, egui::CornerRadius::same(6), egui::Stroke::new(1.0, t.accent), egui::StrokeKind::Inside);
@@ -1111,13 +1111,13 @@ pub(crate) fn show(app: &mut VectorcraftApp, ui: &mut egui::Ui) {
             }
             craft_ui::docking::Hit::Icon(ref id) => {
                 let is_icon_active = app.ui.open_panel.as_deref() == Some(id.as_str());
-                let anim = ui.ctx().animate_bool_with_time(ui.id().with(("dockicon_active_anim", id)), is_icon_active, 0.35);
+                let anim = ui.ctx().animate_bool_with_time(ui.scope_id().with(("dockicon_active_anim", id)), is_icon_active, 0.35);
 
                 if anim > 0.005 {
                     let box_rect = rect.shrink2(egui::vec2(2.0, 2.0));
                     let fill_height = box_rect.height() * anim;
                     let rising_rect = egui::Rect::from_min_max(egui::pos2(box_rect.left(), box_rect.bottom() - fill_height), box_rect.right_bottom());
-                    let mut clip_painter = ui.painter().with_clip_rect(box_rect);
+                    let clip_painter = ui.painter().with_clip_rect(box_rect);
                     clip_painter.rect_filled(rising_rect, egui::CornerRadius::same(6), t.accent);
                     if anim > 0.85 {
                         clip_painter.rect_stroke(box_rect, egui::CornerRadius::same(6), egui::Stroke::new(1.0, t.accent), egui::StrokeKind::Inside);

@@ -35,7 +35,6 @@ pub use tabs::{doc_tabs, isolation_bar};
 pub const APP_BAR_HEIGHT: f32 = 45.0;
 /// The brand mark's side.
 #[allow(dead_code)]
-#[allow(dead_code)]
 const MARK: f32 = 18.0;
 /// Height of the workspace switcher.
 const WIDGET_H: f32 = 30.0;
