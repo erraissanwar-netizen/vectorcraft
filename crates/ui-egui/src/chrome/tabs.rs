@@ -177,7 +177,7 @@ pub fn doc_tabs(app: &mut VectorcraftApp, ui: &mut Ui) {
     // the drag just ended), for moving it along the strip.
     let mut slots: Vec<(usize, egui::Rect)> = vec![];
     let mut dragged = None;
-    for (k, ((title, galley), w)) in tabs.iter().zip(&widths).enumerate().skip(first) {
+    for (k, ((title, _galley), w)) in tabs.iter().zip(&widths).enumerate().skip(first) {
         if x + w > strip.left() + room && Some(k) != active {
             break;
         }
