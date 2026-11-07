@@ -162,9 +162,9 @@ pub fn doc_tabs(app: &mut VectorcraftApp, ui: &mut Ui) {
     let bg_color = if edit_btn_resp.hovered() { t.hover } else { egui::Color32::TRANSPARENT };
     let border_color = if edit_btn_resp.hovered() { t.accent } else { t.border };
     if bg_color != egui::Color32::TRANSPARENT {
-        ui.painter().rect_filled(edit_btn_rect, CornerRadius::same(6), bg_color);
+        ui.painter().rect_filled(edit_btn_rect, egui::CornerRadius::same(6), bg_color);
     }
-    ui.painter().rect_stroke(edit_btn_rect, CornerRadius::same(6), Stroke::new(1.0, border_color), egui::StrokeKind::Inside);
+    ui.painter().rect_stroke(edit_btn_rect, egui::CornerRadius::same(6), Stroke::new(1.0, border_color), egui::StrokeKind::Inside);
 
     icons::paint(
         ui,
