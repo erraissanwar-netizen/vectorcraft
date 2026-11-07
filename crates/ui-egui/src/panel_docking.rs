@@ -1098,8 +1098,14 @@ pub(crate) fn show(app: &mut VectorcraftApp, ui: &mut egui::Ui) {
                 let is_tab_active = layout.panel_state(id) == craft_ui::docking::PanelState::Front;
                 let anim = ui.ctx().animate_bool_with_time(ui.scope_id().with(("docktab_active_anim", id)), is_tab_active, 0.35);
 
+                let tab_rect = rect.shrink2(egui::vec2(2.0, 2.0));
+
+                if anim < 0.99 {
+                    let border_color = if is_tab_active { t.accent } else { t.border.gamma_multiply(0.6) };
+                    ui.painter().rect_stroke(tab_rect, egui::CornerRadius::same(6), egui::Stroke::new(1.0, border_color), egui::StrokeKind::Inside);
+                }
+
                 if anim > 0.005 {
-                    let tab_rect = rect.shrink2(egui::vec2(2.0, 2.0));
                     let fill_height = tab_rect.height() * anim;
                     let rising_rect = egui::Rect::from_min_max(egui::pos2(tab_rect.left(), tab_rect.bottom() - fill_height), tab_rect.right_bottom());
                     let clip_painter = ui.painter().with_clip_rect(tab_rect);
@@ -1210,8 +1216,8 @@ fn dock_style(ui: &egui::Ui) -> craft_ui::docking::DockStyle {
     let mut style = craft_ui::docking::DockStyle::from_ui(ui);
     style.tab_height = 33.0;
     style.background = t.panel;
-    style.tab_background = t.tab_strip;
-    style.active_background = t.button;
+    style.tab_background = egui::Color32::TRANSPARENT;
+    style.active_background = egui::Color32::TRANSPARENT;
     style.text = t.text_strong;
     style.inactive_text = t.text_dim;
     style.border = egui::Stroke::new(1.0, t.border);

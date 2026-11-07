@@ -36,7 +36,7 @@ pub fn doc_tabs(app: &mut VectorcraftApp, ui: &mut Ui) {
     let t = Tokens::get(ui.ctx());
     let (height, title_size) = if app.session.prefs.large_tabs { (44.0, 14.0) } else { (35.0, 12.5) };
     let (strip, _) = ui.allocate_exact_size(vec2(ui.available_width(), height), Sense::hover());
-    ui.painter().rect_filled(strip, 0.0, t.tab_strip);
+    ui.painter().rect_filled(strip, 0.0, t.app_bar);
     ui.painter().line_segment([strip.left_bottom(), strip.right_bottom()], Stroke::new(1.0, t.border));
     // On the Home screen no tab is the current one.
     let active = app.session.active_index().filter(|_| app.ui.home.is_none());
@@ -77,8 +77,10 @@ pub fn doc_tabs(app: &mut VectorcraftApp, ui: &mut Ui) {
         // Inactive tab pill box styling: subtle border, rounded-md (6px), slight hover background
         if anim < 0.99 {
             let bg = if resp.hovered() { t.hover.gamma_multiply(0.4) } else { egui::Color32::TRANSPARENT };
-            let border = if resp.hovered() { t.input_border } else { t.border };
-            ui.painter().rect_filled(tab_box, egui::CornerRadius::same(6), bg);
+            let border = if resp.hovered() { t.input_border } else { t.border.gamma_multiply(0.6) };
+            if bg != egui::Color32::TRANSPARENT {
+                ui.painter().rect_filled(tab_box, egui::CornerRadius::same(6), bg);
+            }
             ui.painter().rect_stroke(tab_box, egui::CornerRadius::same(6), Stroke::new(1.0, border), egui::StrokeKind::Inside);
         }
 
@@ -147,8 +149,8 @@ pub fn doc_tabs(app: &mut VectorcraftApp, ui: &mut Ui) {
         });
     }
     // "Edit in Code Editor" button at extreme right of document bar
-    let edit_btn_w = 176.0;
-    let edit_btn_h = 27.0;
+    let edit_btn_w = 188.0;
+    let edit_btn_h = 28.0;
     let edit_btn_rect = egui::Rect::from_min_size(
         egui::pos2(strip.right() - edit_btn_w - 8.0, strip.top() + (strip.height() - edit_btn_h) * 0.5),
         vec2(edit_btn_w, edit_btn_h),
@@ -157,10 +159,11 @@ pub fn doc_tabs(app: &mut VectorcraftApp, ui: &mut Ui) {
     if edit_btn_resp.hovered() {
         ui.ctx().set_cursor_icon(egui::CursorIcon::PointingHand);
     }
-    let bg_color =
-        if edit_btn_resp.hovered() { t.hover } else { if t.dark { egui::Color32::from_rgb(0x18, 0x1b, 0x22) } else { egui::Color32::WHITE } };
+    let bg_color = if edit_btn_resp.hovered() { t.hover } else { egui::Color32::TRANSPARENT };
     let border_color = if edit_btn_resp.hovered() { t.accent } else { t.border };
-    ui.painter().rect_filled(edit_btn_rect, CornerRadius::same(6), bg_color);
+    if bg_color != egui::Color32::TRANSPARENT {
+        ui.painter().rect_filled(edit_btn_rect, CornerRadius::same(6), bg_color);
+    }
     ui.painter().rect_stroke(edit_btn_rect, CornerRadius::same(6), Stroke::new(1.0, border_color), egui::StrokeKind::Inside);
 
     icons::paint(
