@@ -358,6 +358,50 @@ fn render_edit_in_code_button(ui: &mut Ui, strip: egui::Rect, t: &Tokens) {
     }
 }
 
+/// Makes document `i` the current one, as a click on its tab does: the Home screen closes, and
+/// with the Artboard tool the artboard the document shows becomes the tool's target.
+pub(crate) fn show_document(app: &mut VectorcraftApp, i: usize) {
+    app.ui.home = None;
+    let changed = app.session.active_index() != Some(i);
+    if app.session.set_active(i)
+        && changed
+        && app.session.tool_id() == "artboard"
+        && let Some(n) = app.session.active().map(|d| d.doc.artboards.len())
+    {
+        // A document switch recreates the tool; restore the displayed board as its target.
+        // Clicking the current tab keeps its existing multiselection and tool options.
+        let selected = crate::panels::artboards::selected(app, n);
+        crate::panels::artboards::select(app, selected);
+    }
+}
+
+/// `window.nextDocument` (`forward`) and `window.previousDocument`: makes the open document after
+/// the current one in tab order (before it) the current one, as a click on its tab does. After the
+/// last document comes the first, and before the first document comes the last. On the Home
+/// screen, where no tab is the current one, the next document is the first and the previous
+/// document is the last. Each view Window › New Window opened is a step of its own. Returns
+/// `{index}`, with the view's number as `view` while the document has more than one view.
+pub fn step_document(app: &mut VectorcraftApp, forward: bool) -> Result<serde_json::Value, String> {
+    let all = crate::doc_windows::windows(app);
+    let n = all.len();
+    if n == 0 {
+        return Err("no document open".into());
+    }
+    let current = crate::doc_windows::current(app).filter(|_| app.ui.home.is_none()).and_then(|c| all.iter().position(|w| *w == c));
+    let k = match (current, forward) {
+        (Some(a), true) => (a + 1) % n,
+        (Some(a), false) => (a + n - 1) % n,
+        (None, true) => 0,
+        (None, false) => n - 1,
+    };
+    let Some(&w) = all.get(k) else { return Err("no document open".into()) };
+    crate::doc_windows::show_window(app, w);
+    Ok(match crate::doc_windows::label(app, w) {
+        Some(view) => json!({ "index": w.0, "view": view }),
+        None => json!({ "index": w.0 }),
+    })
+}
+
 /// The isolation mode breadcrumb bar. It is drawn over the top of `area` (the canvas), after the
 /// canvas, so entering isolation mode does not change the canvas's size (#3126).
 pub fn isolation_bar(app: &mut VectorcraftApp, ui: &mut Ui, area: egui::Rect) {
