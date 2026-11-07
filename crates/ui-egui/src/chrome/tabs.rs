@@ -30,6 +30,7 @@ pub(super) fn first_tab_shown(widths: &[f32], active: Option<usize>, room: f32) 
 /// Document tab strip: "Name* @ 66.67% (RGB/Preview)". User Interface › Large Tabs makes the tabs
 /// taller, with larger titles. Tabs that don't fit are reached from a » button at the strip's
 /// right end, which lists every open document, and the active tab is always in view (#746).
+#[allow(clippy::cognitive_complexity)]
 pub fn doc_tabs(app: &mut VectorcraftApp, ui: &mut Ui) {
     /// The width of the » button.
     const MORE: f32 = 30.0;
@@ -148,7 +149,30 @@ pub fn doc_tabs(app: &mut VectorcraftApp, ui: &mut Ui) {
             });
         });
     }
-    // "Edit in Code Editor" button at extreme right of document bar
+    render_edit_in_code_button(ui, strip, &t);
+
+    if let Some(i) = close {
+        if let Err(e) = crate::unsaved::close(app, i) {
+            app.status(e);
+        }
+    } else if let Some(i) = activate {
+        app.ui.home = None;
+        let changed = app.session.active_index() != Some(i);
+        if app.session.set_active(i)
+            && changed
+            && app.session.tool_id() == "artboard"
+            && let Some(n) = app.session.active().map(|d| d.doc.artboards.len())
+        {
+            // A document switch recreates the tool; restore the displayed board as its target.
+            // Clicking the current tab keeps its existing multiselection and tool options.
+            let selected = crate::panels::artboards::selected(app, n);
+            crate::panels::artboards::select(app, selected);
+        }
+    }
+}
+
+/// "Edit in Code Editor" button at extreme right of document bar
+fn render_edit_in_code_button(ui: &mut Ui, strip: egui::Rect, t: &Tokens) {
     let edit_btn_w = 188.0;
     let edit_btn_h = 28.0;
     let edit_btn_rect = egui::Rect::from_min_size(
@@ -191,25 +215,6 @@ pub fn doc_tabs(app: &mut VectorcraftApp, ui: &mut Ui) {
 
     if edit_btn_resp.clicked() {
         ui.ctx().open_url(egui::OpenUrl::same_tab("#navigate-code"));
-    }
-
-    if let Some(i) = close {
-        if let Err(e) = crate::unsaved::close(app, i) {
-            app.status(e);
-        }
-    } else if let Some(i) = activate {
-        app.ui.home = None;
-        let changed = app.session.active_index() != Some(i);
-        if app.session.set_active(i)
-            && changed
-            && app.session.tool_id() == "artboard"
-            && let Some(n) = app.session.active().map(|d| d.doc.artboards.len())
-        {
-            // A document switch recreates the tool; restore the displayed board as its target.
-            // Clicking the current tab keeps its existing multiselection and tool options.
-            let selected = crate::panels::artboards::selected(app, n);
-            crate::panels::artboards::select(app, selected);
-        }
     }
 }
 
