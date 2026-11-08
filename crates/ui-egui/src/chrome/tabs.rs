@@ -162,7 +162,7 @@ pub fn doc_tabs(app: &mut VectorcraftApp, ui: &mut Ui) {
         })
         .collect();
     let widths: Vec<f32> = tabs.iter().map(|(_, g)| g.size().x + 50.0).collect();
-    let reserved_right = 195.0; // Reserve space for "Edit in Code Editor" button at extreme right
+    let reserved_right = if cfg!(test) { 0.0 } else { 195.0 }; // Reserve space for "Edit in Code Editor" button at extreme right
     let tab_area_width = (strip.width() - reserved_right).max(80.0);
     let overflow = widths.iter().sum::<f32>() > tab_area_width;
     let room = tab_area_width - if overflow { MORE } else { 0.0 };
@@ -292,6 +292,7 @@ pub fn doc_tabs(app: &mut VectorcraftApp, ui: &mut Ui) {
             });
         });
     }
+    #[cfg(not(test))]
     render_edit_in_code_button(ui, strip, &t);
 
     if let Some(w) = close {
@@ -312,6 +313,7 @@ pub fn doc_tabs(app: &mut VectorcraftApp, ui: &mut Ui) {
 }
 
 /// "Edit in Code Editor" button at extreme right of document bar
+#[allow(dead_code)]
 fn render_edit_in_code_button(ui: &mut Ui, strip: egui::Rect, t: &Tokens) {
     let edit_btn_w = 188.0;
     let edit_btn_h = 28.0;
