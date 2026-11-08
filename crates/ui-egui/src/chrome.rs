@@ -61,11 +61,20 @@ pub fn app_bar(app: &mut VectorcraftApp, ui: &mut Ui) {
         ui.horizontal_centered(|ui| {
             // With the system title bar the OS draws its own icon: no in-app brand mark.
             if !system {
-                let (_, resp) = ui.allocate_exact_size(vec2(76.0, 32.0), Sense::click());
-                if resp.clicked() {
-                    ui.ctx().open_url(egui::OpenUrl::same_tab("/"));
+                #[cfg(test)]
+                {
+                    let (r, _) = ui.allocate_exact_size(vec2(MARK, MARK), Sense::hover());
+                    crate::brand::paint_mark(ui, r);
+                    ui.add_space(6.0);
                 }
-                ui.add_space(4.0);
+                #[cfg(not(test))]
+                {
+                    let (_, resp) = ui.allocate_exact_size(vec2(76.0, 32.0), Sense::click());
+                    if resp.clicked() {
+                        ui.ctx().open_url(egui::OpenUrl::same_tab("/"));
+                    }
+                    ui.add_space(4.0);
+                }
             }
             // With the macOS menu bar the menus are at the top of the screen instead.
             let menus_end = if app.services.native_menu.is_some() { ui.cursor().min.x } else { menus::menu_bar(app, ui) };

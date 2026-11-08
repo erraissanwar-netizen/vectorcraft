@@ -5,12 +5,17 @@
 use egui::{Color32, Context, Id, Rect, TextureHandle, TextureOptions, Ui, pos2};
 
 /// 128 px: sharp at 44 pt on a 2× display, and the mipmaps keep 22 pt clean.
-#[allow(dead_code)]
 const ICON_PNG: &[u8] = include_bytes!("../../../assets/app-icon/hicolor/128x128/apps/ai.storyteller.vectorcraft.png");
 
-/// The icon's pixels: transparent placeholder (SVGCode does not use VectorCraft dragon brand mark).
+/// The icon's pixels (one transparent pixel if it couldn't be decoded, which a test rules out).
 fn decode() -> egui::ColorImage {
-    egui::ColorImage::filled([1, 1], Color32::TRANSPARENT)
+    match image::load_from_memory_with_format(ICON_PNG, image::ImageFormat::Png) {
+        Ok(img) => {
+            let img = img.to_rgba8();
+            egui::ColorImage::from_rgba_unmultiplied([img.width() as usize, img.height() as usize], img.as_raw())
+        }
+        Err(_) => egui::ColorImage::filled([1, 1], Color32::TRANSPARENT),
+    }
 }
 
 /// The icon texture, uploaded on first use and kept in the context.
