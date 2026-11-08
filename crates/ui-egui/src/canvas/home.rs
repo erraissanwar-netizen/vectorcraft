@@ -25,8 +25,7 @@ pub(super) fn home(app: &mut VectorcraftApp, ui: &mut Ui, rect: egui::Rect) {
 /// The Home screen's column: welcome, New / Open, Recent Files, presets and community links.
 fn home_content(app: &mut VectorcraftApp, ui: &mut Ui) {
     let t = Tokens::get(ui.ctx());
-    let title =
-        if cfg!(test) { tl!("Welcome to VectorCraft") } else { tl!("Welcome to SVGCode Editor") };
+    let title = if cfg!(test) { tl!("Welcome to VectorCraft") } else { tl!("Welcome to SVGCode Editor") };
     let subtitle = if cfg!(test) {
         tl!("Vector illustration — fast, open, scriptable.")
     } else {
