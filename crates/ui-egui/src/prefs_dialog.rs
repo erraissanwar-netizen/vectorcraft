@@ -299,7 +299,8 @@ fn category_fields(ui: &mut egui::Ui, app: &mut VectorcraftApp, d: &mut Dialog, 
                 if cfg!(all(not(target_arch = "wasm32"), not(target_os = "macos"))) {
                     bool_row(ui, d, sp.key, sp.label);
                     // The window's decorations are chosen once, when the app starts.
-                    let note = if cfg!(test) { tl!("Applies the next time VectorCraft starts.") } else { tl!("Applies the next time SVGCode starts.") };
+                    let note =
+                        if cfg!(test) { tl!("Applies the next time VectorCraft starts.") } else { tl!("Applies the next time SVGCode starts.") };
                     ui.label(egui::RichText::new(note).color(t.text_dim).size(11.0));
                 }
             }
@@ -351,7 +352,8 @@ fn category_fields(ui: &mut egui::Ui, app: &mut VectorcraftApp, d: &mut Dialog, 
                 choice_row(ui, d, sp.key, sp.label, opts, &v);
                 if sp.key == "gpuPreference" || sp.key == "linuxDisplayServer" {
                     // The window's graphics device and display server are chosen once, when the app starts.
-                    let note = if cfg!(test) { tl!("Applies the next time VectorCraft starts.") } else { tl!("Applies the next time SVGCode starts.") };
+                    let note =
+                        if cfg!(test) { tl!("Applies the next time VectorCraft starts.") } else { tl!("Applies the next time SVGCode starts.") };
                     ui.label(egui::RichText::new(note).color(t.text_dim).size(11.0));
                 }
                 if sp.key == "linuxDisplayServer" {
