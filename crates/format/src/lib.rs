@@ -92,7 +92,7 @@ pub fn is_native_name(name: &str) -> bool {
 
 #[derive(Debug, thiserror::Error)]
 pub enum FormatError {
-    #[error("not an SVGCode file: {0}")]
+    #[error("not a VectorCraft file: {0}")]
     NotVectorcraft(String),
     #[error("file version {0} is newer than this VectorCraft supports ({VERSION})")]
     TooNew(u32),
