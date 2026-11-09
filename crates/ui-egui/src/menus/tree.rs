@@ -20,7 +20,10 @@ pub fn menu_tree_named(english_names: bool) -> Vec<(&'static str, Vec<Item>)> {
             // Quit from File, Language and Appearance synthesized). It stays first: `from_tree`
             // gives the first menu the App role.
             if cfg!(test) { "VectorCraft" } else { "SVGCode" },
-            vec![c("About SVGCode Editor", "help.about")],
+            vec![c(
+                if cfg!(test) { "About VectorCraft" } else { "About SVGCode Editor" },
+                "help.about",
+            )],
         ),
         (
             "File",
@@ -695,14 +698,29 @@ pub fn menu_tree_named(english_names: bool) -> Vec<(&'static str, Vec<Item>)> {
         }),
         (
             "Help",
-            vec![
-                c("Contact Us", "help.contact"),
-                c("Report Bug", "help.reportBug"),
-                Sep,
-                c("Command & Tool…", "help.commandPalette"),
-                Sep,
-                c("About SVGCode Editor", "help.about"),
-            ],
+            if cfg!(test) {
+                vec![
+                    c("Join Our Discord", "help.discord"),
+                    c("ArtCraft Website", "help.website"),
+                    c("VectorCraft on getartcraft.com", "help.appPage"),
+                    c("VectorCraft on GitHub", "help.github"),
+                    Sep,
+                    c("Search Commands…", "help.commandPalette"),
+                    todos("VectorCraft Help…", "F1"),
+                    Sep,
+                    c("Check for Updates…", "help.checkForUpdates"),
+                    c("About VectorCraft", "help.about"),
+                ]
+            } else {
+                vec![
+                    c("Contact Us", "help.contact"),
+                    c("Report Bug", "help.reportBug"),
+                    Sep,
+                    c("Command & Tool…", "help.commandPalette"),
+                    Sep,
+                    c("About SVGCode Editor", "help.about"),
+                ]
+            },
         ),
     ]
 }
