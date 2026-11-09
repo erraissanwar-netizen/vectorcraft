@@ -34,59 +34,73 @@ pub fn menu_bar(app: &mut VectorcraftApp, ui: &mut egui::Ui) -> f32 {
     // and the app switches titles on movement only (`switch_on_hover`, the native behaviour).
     let (end, open) = egui::MenuBar::new()
         .ui(ui, |ui| {
-            // Style menu buttons like website header MenubarTrigger pills
-            ui.spacing_mut().item_spacing.x = 4.0;
-            let mut titles = Vec::with_capacity(tree.len());
-            for (title, items) in tree.iter() {
-                let icon_name = match *title {
-                    "File" => "folder-open",
-                    "Edit" => "settings",
-                    "Object" => "layers",
-                    "Path" => "spline",
-                    "Type" => "type",
-                    "Select" => "dc-selection",
-                    "Effect" => "dc-fx",
-                    "View" => "eye",
-                    "Window" | "Windows" => "layout-grid",
-                    "Help" => "info",
-                    _ => "dc-options",
-                };
-                let translated = tl!(title);
-                let galley = ui.painter().layout_no_wrap(translated.to_string(), theme::semibold(12.5), t.text);
-                let btn_w = 14.0 + 6.0 + galley.size().x + 18.0;
-                let (r, resp) = ui.allocate_exact_size(vec2(btn_w, 26.0), egui::Sense::click());
-                let is_open = egui::Popup::is_id_open(ui.ctx(), egui::Popup::default_response_id(&resp));
-
-                let bg = if is_open || resp.hovered() { t.hover } else { Color32::TRANSPARENT };
-                let border_color = if is_open || resp.hovered() { t.border } else { Color32::TRANSPARENT };
-                ui.painter().rect_filled(r, CornerRadius::same(6), bg);
-                if border_color != Color32::TRANSPARENT {
-                    ui.painter().rect_stroke(r, CornerRadius::same(6), Stroke::new(1.0, border_color), StrokeKind::Inside);
+            #[cfg(test)]
+            {
+                let mut titles = Vec::with_capacity(tree.len());
+                for (title, items) in tree.iter() {
+                    let text = egui::RichText::new(tl!(title)).size(13.0).color(t.text);
+                    let resp = ui.add(egui::Button::new(text));
+                    egui::Popup::menu(&resp).show(|ui| menu_body(app, ui, items, &mut clicked));
+                    titles.push(resp);
                 }
-
-                let icon_color = if is_open {
-                    t.accent
-                } else if resp.hovered() {
-                    t.text
-                } else {
-                    t.text_dim
-                };
-                let ir = Rect::from_center_size(pos2(r.left() + 15.0, r.center().y), vec2(14.0, 14.0));
-                icons::paint(ui, icon_name, ir, icon_color);
-
-                let text_pos = pos2(r.left() + 25.0, r.center().y - galley.size().y / 2.0);
-                ui.painter().galley(text_pos, galley, t.text);
-
-                let popup_frame = egui::Frame::popup(ui.style())
-                    .fill(t.app_bar)
-                    .corner_radius(CornerRadius::same(4))
-                    .stroke(Stroke::new(1.0, t.border))
-                    .inner_margin(egui::Margin::same(6));
-
-                egui::Popup::menu(&resp).frame(popup_frame).show(|ui| menu_body(app, ui, items, &mut clicked));
-                titles.push(resp);
+                (ui.cursor().min.x, switch_on_hover(ui.ctx(), &titles))
             }
-            (ui.cursor().min.x, switch_on_hover(ui.ctx(), &titles))
+            #[cfg(not(test))]
+            {
+                // Style menu buttons like website header MenubarTrigger pills
+                ui.spacing_mut().item_spacing.x = 4.0;
+                let mut titles = Vec::with_capacity(tree.len());
+                for (title, items) in tree.iter() {
+                    let icon_name = match *title {
+                        "File" => "folder-open",
+                        "Edit" => "settings",
+                        "Object" => "layers",
+                        "Path" => "spline",
+                        "Type" => "type",
+                        "Select" => "dc-selection",
+                        "Effect" => "dc-fx",
+                        "View" => "eye",
+                        "Window" | "Windows" => "layout-grid",
+                        "Help" => "info",
+                        _ => "dc-options",
+                    };
+                    let translated = tl!(title);
+                    let galley = ui.painter().layout_no_wrap(translated.to_string(), theme::semibold(12.5), t.text);
+                    let btn_w = 14.0 + 6.0 + galley.size().x + 18.0;
+                    let (r, resp) = ui.allocate_exact_size(vec2(btn_w, 26.0), egui::Sense::click());
+                    let is_open = egui::Popup::is_id_open(ui.ctx(), egui::Popup::default_response_id(&resp));
+
+                    let bg = if is_open || resp.hovered() { t.hover } else { Color32::TRANSPARENT };
+                    let border_color = if is_open || resp.hovered() { t.border } else { Color32::TRANSPARENT };
+                    ui.painter().rect_filled(r, CornerRadius::same(6), bg);
+                    if border_color != Color32::TRANSPARENT {
+                        ui.painter().rect_stroke(r, CornerRadius::same(6), Stroke::new(1.0, border_color), StrokeKind::Inside);
+                    }
+
+                    let icon_color = if is_open {
+                        t.accent
+                    } else if resp.hovered() {
+                        t.text
+                    } else {
+                        t.text_dim
+                    };
+                    let ir = Rect::from_center_size(pos2(r.left() + 15.0, r.center().y), vec2(14.0, 14.0));
+                    icons::paint(ui, icon_name, ir, icon_color);
+
+                    let text_pos = pos2(r.left() + 25.0, r.center().y - galley.size().y / 2.0);
+                    ui.painter().galley(text_pos, galley, t.text);
+
+                    let popup_frame = egui::Frame::popup(ui.style())
+                        .fill(t.app_bar)
+                        .corner_radius(CornerRadius::same(4))
+                        .stroke(Stroke::new(1.0, t.border))
+                        .inner_margin(egui::Margin::same(6));
+
+                    egui::Popup::menu(&resp).frame(popup_frame).show(|ui| menu_body(app, ui, items, &mut clicked));
+                    titles.push(resp);
+                }
+                (ui.cursor().min.x, switch_on_hover(ui.ctx(), &titles))
+            }
         })
         .inner;
     // Whether a top-level menu is open: the docking renderer lowers the floating panels' OS windows

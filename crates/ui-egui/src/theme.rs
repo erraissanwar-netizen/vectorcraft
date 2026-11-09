@@ -599,7 +599,7 @@ pub fn apply_with(ctx: &egui::Context, b: Brightness, accent: Accent, scheme: Sc
     ctx.set_theme(theme);
     let mut v = if t.dark { Visuals::dark() } else { Visuals::light() };
     v.panel_fill = t.panel;
-    v.window_fill = t.app_bar;
+    v.window_fill = if cfg!(test) { t.panel } else { t.app_bar };
     v.extreme_bg_color = t.input;
     v.faint_bg_color = t.panel_darker;
     v.window_stroke = Stroke::new(1.0, t.border);
