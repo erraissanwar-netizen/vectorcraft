@@ -20,10 +20,7 @@ pub fn menu_tree_named(english_names: bool) -> Vec<(&'static str, Vec<Item>)> {
             // Quit from File, Language and Appearance synthesized). It stays first: `from_tree`
             // gives the first menu the App role.
             if cfg!(test) { "VectorCraft" } else { "SVGCode" },
-            vec![c(
-                if cfg!(test) { "About VectorCraft" } else { "About SVGCode Editor" },
-                "help.about",
-            )],
+            vec![c(if cfg!(test) { "About VectorCraft" } else { "About SVGCode Editor" }, "help.about")],
         ),
         (
             "File",
