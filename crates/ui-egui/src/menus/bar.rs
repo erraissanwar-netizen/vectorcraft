@@ -2,7 +2,9 @@ use super::entries::{Row, entry, shown_shortcut};
 use super::invoke::{field_event, focused_text_field, invoke, to_field, with_held_keys};
 use super::tree::menu_tree_named;
 use super::{Entry, Item, Tokens, Value, VectorcraftApp, widgets};
+#[cfg(not(test))]
 use crate::{icons, theme};
+#[cfg(not(test))]
 use egui::{Color32, CornerRadius, Rect, Stroke, StrokeKind, pos2, vec2};
 
 /// Render the menu bar.
