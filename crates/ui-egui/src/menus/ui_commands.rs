@@ -701,6 +701,7 @@ pub const UI_COMMANDS: &[(&str, &str, &str, &str)] = &[
     ("help.reportBug", "Report Bug", "", "{}"),
     ("view.toggleScrollLock", "Unlock Scroll", "", "{}"),
     ("help.about", "About SVGCode Editor", "", "{}"),
+    ("help.checkForUpdates", "Check for Updates…", "", "{}"),
     ("help.commandPalette", "Command & Tool…", "Cmd+Shift+/", "{}"),
     ("app.quit", "Quit SVGCode Editor", "Cmd+Q", "{}"),
     (
