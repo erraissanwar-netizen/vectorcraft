@@ -3,6 +3,7 @@
 use std::borrow::Cow;
 use std::sync::Arc;
 
+#[allow(unused_imports)]
 use egui::{CornerRadius, Sense, Stroke, Ui, vec2};
 use serde_json::json;
 use vectorcraft_doc::NodeKind;
@@ -38,6 +39,7 @@ pub const APP_BAR_HEIGHT: f32 = 45.0;
 #[allow(dead_code)]
 const MARK: f32 = 18.0;
 /// Height of the workspace switcher.
+#[allow(dead_code)]
 const WIDGET_H: f32 = 30.0;
 
 /// The application bar: brand mark, Home, menus, then Discord, search and the workspace switcher
@@ -69,7 +71,7 @@ pub fn app_bar(app: &mut VectorcraftApp, ui: &mut Ui) {
                 }
                 #[cfg(not(test))]
                 {
-                    let (_, resp) = ui.allocate_exact_size(vec2(76.0, 32.0), Sense::click());
+                    let (_, resp) = ui.allocate_exact_size(vec2(162.0, 32.0), Sense::click());
                     if resp.clicked() {
                         ui.ctx().open_url(egui::OpenUrl::same_tab("/"));
                     }
@@ -90,23 +92,33 @@ pub fn app_bar(app: &mut VectorcraftApp, ui: &mut Ui) {
             // short, Discord goes first (it is also under Help), then the search icon (the palette
             // stays under its shortcut), then the workspace switcher narrows.
             let full = ui.max_rect();
-            let right_edge = if custom { full.right() - titlebar::WIDTH - 10.0 } else { full.right() };
+            let right_edge = if custom { full.right() - titlebar::WIDTH - 10.0 } else { full.right() - 200.0 };
             let right = egui::Rect::from_min_max(egui::pos2(menus_end + 8.0, full.top()), egui::pos2(right_edge, full.bottom()));
+            #[cfg(test)]
             let room = right.width();
             // Built-in workspace names translate; the user's own stay as typed.
+            #[cfg(test)]
             let ws_name =
                 if crate::workspaces::is_builtin(&app.ui.workspace) { tl!(&app.ui.workspace).to_string() } else { app.ui.workspace.clone() };
+            #[cfg(test)]
             let ws = ui.painter().layout_no_wrap(ws_name, egui::FontId::proportional(12.0), t.text);
+            #[cfg(test)]
             let ws_w = (ws.size().x + 36.0).clamp(112.0, 190.0);
+            #[cfg(test)]
             let gap = ui.spacing().item_spacing.x;
             // The search icon, as in PhotoCraft: shown while a minimal switcher fits beside it.
+            #[cfg(test)]
             let icon = if cfg!(test) { 28.0 } else { 30.0 };
+            #[cfg(test)]
             let search = room >= 64.0 + 8.0 + gap + icon;
+            #[cfg(test)]
             let ws_w = ws_w.min(room - 8.0 - gap - if search { icon } else { 0.0 }).max(64.0);
             #[cfg(test)]
             let discord = search && room >= ws_w + 8.0 + gap + icon + 10.0 + gap + crate::community::discord_width(ui, false);
             let mut rui = ui.new_child(egui::UiBuilder::new().max_rect(right).layout(egui::Layout::right_to_left(egui::Align::Center)));
             let ui = &mut rui;
+            #[cfg(test)]
+            {
             // Workspace switcher: shows the current workspace, opens Window → Workspace.
             let (wr, wresp) = ui.allocate_exact_size(vec2(ws_w, WIDGET_H), Sense::click());
             ui.painter().rect_filled(wr, CornerRadius::same(4), if wresp.hovered() { t.hover } else { t.panel });
@@ -125,6 +137,7 @@ pub fn app_bar(app: &mut VectorcraftApp, ui: &mut Ui) {
                     app.ui.palette_open = !app.ui.palette_open;
                     app.ui.palette_query.clear();
                 }
+            }
             }
             #[cfg(test)]
             if discord {

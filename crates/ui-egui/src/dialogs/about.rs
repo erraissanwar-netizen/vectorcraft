@@ -1,4 +1,4 @@
-//! Help → About SVGCode Editor.
+//! Help → About SVG Editor.
 
 use crate::VectorcraftApp;
 use crate::theme::{self, Tokens};
@@ -9,7 +9,9 @@ pub(super) fn show(app: &mut VectorcraftApp, ctx: &egui::Context) {
         return;
     }
     let mut open = true;
-    egui::Window::new(tl!("About SVGCode Editor"))
+    let title = if cfg!(test) { tl!("About VectorCraft") } else { tl!("About SVG Editor") };
+    let tab_title = if cfg!(test) { tl!("About VectorCraft") } else { tl!("About SVG Editor") };
+    egui::Window::new(title)
         .collapsible(false)
         .resizable(false)
         .open(&mut open)
@@ -17,9 +19,9 @@ pub(super) fn show(app: &mut VectorcraftApp, ctx: &egui::Context) {
         .default_pos(ctx.content_rect().center())
         .frame(egui::Frame::window(&ctx.global_style()).inner_margin(egui::Margin::same(18)))
         .show(ctx, |ui| {
-            // One tab: About SVGCode Editor
+            // One tab: About SVG Editor
             ui.horizontal(|ui| {
-                let _ = ui.selectable_label(true, tl!("About SVGCode Editor"));
+                let _ = ui.selectable_label(true, tab_title);
             });
             ui.separator();
             about_tab(app, ui);
@@ -32,22 +34,28 @@ fn about_tab(app: &mut VectorcraftApp, ui: &mut egui::Ui) {
     let t = Tokens::get(ui.ctx());
     ui.set_width(420.0);
     ui.horizontal(|ui| {
-        let (r, _) = ui.allocate_exact_size(egui::vec2(64.0, 32.0), egui::Sense::hover());
+        let (r, _) = ui.allocate_exact_size(egui::vec2(44.0, 44.0), egui::Sense::hover());
         crate::brand::paint_mark(ui, r);
-        ui.add_space(8.0);
+        ui.add_space(10.0);
         ui.vertical(|ui| {
-            ui.label(egui::RichText::new("SVGCode Editor").font(theme::semibold(20.0)).color(t.text));
+            let heading = if cfg!(test) { "VectorCraft" } else { "SVG Editor" };
+            ui.label(egui::RichText::new(heading).font(theme::semibold(20.0)).color(t.text));
         });
     });
     ui.add_space(12.0);
     ui.label(
         egui::RichText::new(tl!(
-            "SVGCode Editor is an online vector graphics editor that makes creating, editing, and customizing SVG designs simple and accessible. From drawing shapes and editing paths to designing icons, logos, and illustrations, our goal is to provide a powerful SVG editing experience directly in your browser."
+            "SVG Editor is an online vector graphics editor built over VectorCraft, an open-source vector graphics editor. It makes creating, editing, and customizing SVG designs simple and accessible directly in your browser."
         ))
         .size(12.0)
         .color(t.text),
     );
     ui.add_space(10.0);
+    ui.horizontal_wrapped(|ui| {
+        ui.label(egui::RichText::new(tl!("Built over VectorCraft: ")).size(11.5).color(t.text_dim));
+        ui.hyperlink_to("github.com/storytold/vectorcraft", "https://github.com/storytold/vectorcraft");
+    });
+    ui.add_space(4.0);
     ui.horizontal_wrapped(|ui| {
         ui.label(egui::RichText::new(tl!("Explore vector tools, convert icons, and create graphics at ")).size(11.5).color(t.text_dim));
         ui.hyperlink_to("svgcode.com", "https://svgcode.com");

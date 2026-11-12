@@ -7,7 +7,7 @@
 
 use std::sync::Arc;
 
-use egui::{Color32, CornerRadius, Sense, Stroke, Ui, pos2, vec2};
+use egui::{Color32, CornerRadius, Sense, Stroke, StrokeKind, Ui, pos2, vec2};
 use serde_json::{Value, json};
 use vectorcraft_color::Paint;
 use vectorcraft_tools::{Mods, TOOL_GROUPS, ToolInfo, ToolKey, tool_info};
@@ -241,16 +241,26 @@ fn body(app: &mut VectorcraftApp, ui: &mut Ui, cols: usize, floating: Option<egu
                     let is_active = slot.contains(&active);
                     let (rect, resp) = ui.allocate_exact_size(vec2(36.0, PITCH - 1.0), Sense::click_and_drag());
                     let well = egui::Rect::from_center_size(rect.center(), vec2(30.0, 27.5));
-                    if is_active {
-                        ui.painter().rect_filled(well, CornerRadius::same(6), t.tool_active);
+                    let anim = ui.ctx().animate_bool_with_time(ui.scope_id().with(("tool_active_anim", &shown_id)), is_active, 0.35);
+
+                    if anim > 0.005 {
+                        let fill_height = well.height() * anim;
+                        let rising_rect = egui::Rect::from_min_max(egui::pos2(well.left(), well.bottom() - fill_height), well.right_bottom());
+                        let clip_painter = ui.painter().with_clip_rect(well);
+                        clip_painter.rect_filled(rising_rect, CornerRadius::same(6), t.accent);
+                        if anim > 0.85 {
+                            clip_painter.rect_stroke(well, CornerRadius::same(6), Stroke::new(1.0, t.accent), StrokeKind::Inside);
+                        }
                     } else if resp.hovered() {
                         ui.painter().rect_filled(well, CornerRadius::same(6), t.hover);
                     }
                     let ir = egui::Rect::from_center_size(rect.center(), vec2(18.0, 18.0));
-                    icons::paint(ui, icons::tool_icon(shown.icon), ir, if is_active { t.text_strong } else { t.icon });
+                    let icon_color = if anim >= 0.5 { egui::Color32::WHITE } else { t.icon };
+                    icons::paint(ui, icons::tool_icon(shown.icon), ir, icon_color);
                     if slot.len() > 1 {
                         let c = rect.center() + vec2(12.5, 10.0);
-                        ui.painter().add(egui::Shape::convex_polygon(vec![c, c + vec2(-3.5, 0.0), c + vec2(0.0, -3.5)], t.icon, Stroke::NONE));
+                        let tri_color = if anim >= 0.5 { egui::Color32::WHITE } else { t.icon };
+                        ui.painter().add(egui::Shape::convex_polygon(vec![c, c + vec2(-3.5, 0.0), c + vec2(0.0, -3.5)], tri_color, Stroke::NONE));
                     }
                     if editing {
                         buttons.push((k, rect));
@@ -804,13 +814,22 @@ fn tool_strip(ui: &mut Ui, t: &Tokens, active: &str, tools: &[String]) -> Option
     for tool in tools.iter().filter_map(|id| tool_info(id)) {
         let (r, resp) = ui.allocate_exact_size(STRIP_BUTTON, Sense::click());
         let well = r.shrink(1.0);
-        if active == tool.id {
-            ui.painter().rect_filled(well, CornerRadius::same(6), t.tool_active);
+        let is_active = active == tool.id;
+        let anim = ui.ctx().animate_bool_with_time(ui.scope_id().with(("strip_tool_active_anim", tool.id)), is_active, 0.35);
+        if anim > 0.005 {
+            let fill_height = well.height() * anim;
+            let rising_rect = egui::Rect::from_min_max(egui::pos2(well.left(), well.bottom() - fill_height), well.right_bottom());
+            let clip_painter = ui.painter().with_clip_rect(well);
+            clip_painter.rect_filled(rising_rect, CornerRadius::same(6), t.accent);
+            if anim > 0.85 {
+                clip_painter.rect_stroke(well, CornerRadius::same(6), Stroke::new(1.0, t.accent), StrokeKind::Inside);
+            }
         } else if resp.hovered() {
             ui.painter().rect_filled(well, CornerRadius::same(6), t.hover);
         }
         let ir = egui::Rect::from_center_size(r.center(), vec2(18.0, 18.0));
-        icons::paint(ui, icons::tool_icon(tool.icon), ir, if active == tool.id { t.text_strong } else { t.icon });
+        let icon_color = if anim >= 0.5 { egui::Color32::WHITE } else { t.icon };
+        icons::paint(ui, icons::tool_icon(tool.icon), ir, icon_color);
         resp.widget_info(|| egui::WidgetInfo::selected(egui::Role::Button, ui.is_enabled(), active == tool.id, tip(tool)));
         if resp.on_hover_text(tip(tool)).clicked() {
             chosen = Some(tool.id);

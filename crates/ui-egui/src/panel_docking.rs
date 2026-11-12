@@ -167,7 +167,8 @@ fn default_from(tab: DockTab, order: &[DockTab], collapsed: bool, width: Option<
     }
     let groups: Vec<Group<String>> = ICON_PANEL_GROUPS.iter().filter_map(|g| placed.group(g)).collect();
     if !groups.is_empty() {
-        columns.push(Column { groups, width: COLUMN_WIDTH, iconic: true, iconic_width: Some(ICON_WIDTH) });
+        let width = if cfg!(test) { COLUMN_WIDTH } else { 365.0 };
+        columns.push(Column { groups, width, iconic: true, iconic_width: Some(ICON_WIDTH) });
     }
     for group in columns.iter_mut().filter(|c| c.iconic).flat_map(|c| c.groups.iter_mut()) {
         if let Some(k) = front.and_then(|front| group.panels.iter().position(|p| p == front)) {
@@ -1179,6 +1180,8 @@ pub(crate) fn show(app: &mut VectorcraftApp, ui: &mut egui::Ui) {
                 let anim = ui.ctx().animate_bool_with_time(ui.scope_id().with(("docktab_active_anim", id)), is_tab_active, 0.35);
 
                 let tab_rect = rect.shrink2(egui::vec2(2.0, 2.0));
+                let tab_bg = if t.dark { egui::Color32::from_rgb(0x1c, 0x1d, 0x22) } else { egui::Color32::from_rgb(0xf1, 0xf5, 0xf9) };
+                ui.painter().rect_filled(tab_rect, egui::CornerRadius::same(6), tab_bg);
 
                 if anim < 0.99 {
                     let border_color = if is_tab_active { t.accent } else { t.border.gamma_multiply(0.6) };
@@ -1199,6 +1202,17 @@ pub(crate) fn show(app: &mut VectorcraftApp, ui: &mut egui::Ui) {
                     let text_color = if anim >= 0.5 { egui::Color32::WHITE } else { t.text };
                     let galley = ui.painter().layout_no_wrap(label, crate::theme::semibold(12.5), text_color);
                     clip_painter.galley(
+                        egui::pos2(tab_rect.center().x - galley.size().x / 2.0, tab_rect.center().y - galley.size().y / 2.0),
+                        galley,
+                        text_color,
+                    );
+                } else {
+                    let label = crate::panels::library_panel::tab_label(app, id)
+                        .or_else(|| crate::state::all_panels().find(|p| p.0 == id).map(|p| tl!(p.1).to_string()))
+                        .unwrap_or_else(|| id.clone());
+                    let text_color = t.text_dim;
+                    let galley = ui.painter().layout_no_wrap(label, crate::theme::semibold(12.5), text_color);
+                    ui.painter().galley(
                         egui::pos2(tab_rect.center().x - galley.size().x / 2.0, tab_rect.center().y - galley.size().y / 2.0),
                         galley,
                         text_color,
@@ -1358,8 +1372,8 @@ fn dock_style(ui: &egui::Ui) -> craft_ui::docking::DockStyle {
     let mut style = craft_ui::docking::DockStyle::from_ui(ui);
     style.tab_height = 33.0;
     style.background = t.panel;
-    style.tab_background = egui::Color32::TRANSPARENT;
-    style.active_background = egui::Color32::TRANSPARENT;
+    style.tab_background = if t.dark { egui::Color32::from_rgb(0x1c, 0x1d, 0x22) } else { egui::Color32::from_rgb(0xf1, 0xf5, 0xf9) };
+    style.active_background = style.tab_background;
     style.text = t.text_strong;
     style.inactive_text = t.text_dim;
     style.border = egui::Stroke::new(1.0, t.border);

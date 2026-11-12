@@ -292,8 +292,9 @@ pub fn doc_tabs(app: &mut VectorcraftApp, ui: &mut Ui) {
             });
         });
     }
-    #[cfg(not(test))]
-    render_edit_in_code_button(ui, strip, &t);
+    // Edit in Code Editor button is rendered seamlessly by host FlowButton
+    // #[cfg(not(test))]
+    // render_edit_in_code_button(ui, strip, &t);
 
     if let Some(w) = close {
         if let Err(e) = crate::doc_windows::close_window(app, w) {
