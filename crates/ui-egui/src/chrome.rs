@@ -119,25 +119,25 @@ pub fn app_bar(app: &mut VectorcraftApp, ui: &mut Ui) {
             let ui = &mut rui;
             #[cfg(test)]
             {
-            // Workspace switcher: shows the current workspace, opens Window → Workspace.
-            let (wr, wresp) = ui.allocate_exact_size(vec2(ws_w, WIDGET_H), Sense::click());
-            ui.painter().rect_filled(wr, CornerRadius::same(4), if wresp.hovered() { t.hover } else { t.panel });
-            ui.painter().with_clip_rect(wr.shrink2(vec2(4.0, 0.0))).galley(wr.left_center() + vec2(10.0, -ws.size().y / 2.0), ws, t.text);
-            icons::paint(ui, "chevron-down", egui::Rect::from_center_size(wr.right_center() - vec2(12.0, 0.0), vec2(12.0, 12.0)), t.text_dim);
-            let wresp = wresp.on_hover_text(tl!("Switch workspace"));
-            egui::Popup::menu(&wresp).show(|ui| crate::workspaces::popup(app, ui));
-            ui.add_space(8.0);
-            // Search → command palette (its shortcut opens it too).
-            if search {
-                let tip = match menus::shortcut_of("help.commandPalette") {
-                    Some(sc) => format!("{}  ({})", tl!("Search commands and tools"), menus::shown_shortcut(sc)),
-                    None => tl!("Search commands and tools").to_string(),
-                };
-                if widgets::icon_button(ui, "search", &tip, app.ui.palette_open, icon).clicked() {
-                    app.ui.palette_open = !app.ui.palette_open;
-                    app.ui.palette_query.clear();
+                // Workspace switcher: shows the current workspace, opens Window → Workspace.
+                let (wr, wresp) = ui.allocate_exact_size(vec2(ws_w, WIDGET_H), Sense::click());
+                ui.painter().rect_filled(wr, CornerRadius::same(4), if wresp.hovered() { t.hover } else { t.panel });
+                ui.painter().with_clip_rect(wr.shrink2(vec2(4.0, 0.0))).galley(wr.left_center() + vec2(10.0, -ws.size().y / 2.0), ws, t.text);
+                icons::paint(ui, "chevron-down", egui::Rect::from_center_size(wr.right_center() - vec2(12.0, 0.0), vec2(12.0, 12.0)), t.text_dim);
+                let wresp = wresp.on_hover_text(tl!("Switch workspace"));
+                egui::Popup::menu(&wresp).show(|ui| crate::workspaces::popup(app, ui));
+                ui.add_space(8.0);
+                // Search → command palette (its shortcut opens it too).
+                if search {
+                    let tip = match menus::shortcut_of("help.commandPalette") {
+                        Some(sc) => format!("{}  ({})", tl!("Search commands and tools"), menus::shown_shortcut(sc)),
+                        None => tl!("Search commands and tools").to_string(),
+                    };
+                    if widgets::icon_button(ui, "search", &tip, app.ui.palette_open, icon).clicked() {
+                        app.ui.palette_open = !app.ui.palette_open;
+                        app.ui.palette_query.clear();
+                    }
                 }
-            }
             }
             #[cfg(test)]
             if discord {
