@@ -31,3 +31,5 @@ jobs:
       require-craft-fonts: true
       craft-fonts-ref: b076417b5880bd4154bd22f00695b1d28c6bea83
       run-package-check: true
+      cargo-build-extra-args: "--jobs 2"
+      cargo-test-extra-args: "--jobs 2"
